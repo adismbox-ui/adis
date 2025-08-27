@@ -1,0 +1,2 @@
+Quelle est la capitale de la France ?|Paris;Londres;Berlin;Madrid|Paris|1
+Combien font 2 + 2 ?|3;4;5;6|4|1

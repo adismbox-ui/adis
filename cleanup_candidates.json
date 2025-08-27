@@ -1,0 +1,23 @@
+{
+    "generated_at": "2025-08-11T14:58:10+00:00",
+    "project_root": "C:\\Users\\ROG\\Documents\\adis",
+    "totals": {
+        "views": 0,
+        "controllers": 0,
+        "models": 0,
+        "mail": 0,
+        "services": 0,
+        "assets": 0,
+        "root_scripts": 0
+    },
+    "candidates": {
+        "views": [],
+        "controllers": [],
+        "models": [],
+        "mail": [],
+        "services": [],
+        "assets": [],
+        "root_scripts": []
+    },
+    "note": "This is a heuristic. Review before deletion. Some items may be used dynamically."
+}

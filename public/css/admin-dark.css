@@ -1,0 +1,496 @@
+/* Styles sombres pour les pages Admin ADIS */
+
+:root {
+    --primary-green: #7fb069;
+    --secondary-green: #4a7c59;
+    --accent-green: #a7c957;
+    --dark-green: #2d5016;
+    --bg-dark: #0a0a0a;
+    --bg-darker: #1a1a1a;
+    --text-light: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.7);
+    --border-green: rgba(127, 176, 105, 0.3);
+    --shadow-green: rgba(127, 176, 105, 0.2);
+}
+
+/* Fond sombre avec touches de vert */
+body {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 30%, rgba(45,80,22,0.1) 100%);
+    color: var(--text-light);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Contenu principal sombre */
+.main-content {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 30%, rgba(45,80,22,0.1) 100%);
+    color: var(--text-light);
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+/* Cartes avec effet glassmorphism sombre */
+.card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-green);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    color: var(--text-light);
+    overflow: hidden;
+    position: relative;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(127, 176, 105, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.card:hover::before {
+    left: 100%;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px var(--shadow-green);
+    border-color: rgba(127, 176, 105, 0.4);
+}
+
+.card-header {
+    background: linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(45, 80, 22, 0.2) 100%);
+    border-bottom: 1px solid var(--border-green);
+    color: var(--text-light);
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-green), var(--accent-green));
+    animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { transform: translateX(-100%); }
+    50% { transform: translateX(100%); }
+}
+
+.card-body {
+    color: var(--text-light);
+}
+
+/* Tableaux sombres */
+.table {
+    color: var(--text-light);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table thead th {
+    background: linear-gradient(135deg, rgba(127, 176, 105, 0.2) 0%, rgba(45, 80, 22, 0.3) 100%);
+    color: var(--text-light);
+    border-bottom: 2px solid var(--border-green);
+    font-weight: 600;
+}
+
+.table tbody tr {
+    background: rgba(255, 255, 255, 0.02);
+    transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+    background: rgba(127, 176, 105, 0.1);
+    transform: scale(1.01);
+}
+
+.table tbody td {
+    border-bottom: 1px solid rgba(127, 176, 105, 0.1);
+    color: var(--text-light);
+}
+
+/* Boutons avec dégradés verts */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+    border: none;
+    border-radius: 8px;
+    color: var(--text-light);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(127, 176, 105, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--accent-green) 0%, var(--primary-green) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(127, 176, 105, 0.4);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--secondary-green) 0%, var(--dark-green) 100%);
+    border: none;
+    border-radius: 8px;
+    color: var(--text-light);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(74, 124, 89, 0.3);
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(127, 176, 105, 0.4);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border: none;
+    border-radius: 8px;
+    color: var(--text-light);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #e74c3c 0%, #dc3545 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+}
+
+/* Formulaires sombres */
+.form-control {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-green);
+    border-radius: 8px;
+    color: var(--text-light);
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 0.2rem rgba(127, 176, 105, 0.25);
+    color: var(--text-light);
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.form-label {
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+/* Alertes sombres */
+.alert {
+    border-radius: 10px;
+    border: none;
+    backdrop-filter: blur(10px);
+}
+
+.alert-success {
+    background: rgba(127, 176, 105, 0.2);
+    color: var(--text-light);
+    border-left: 4px solid var(--primary-green);
+}
+
+.alert-danger {
+    background: rgba(220, 53, 69, 0.2);
+    color: var(--text-light);
+    border-left: 4px solid #dc3545;
+}
+
+.alert-warning {
+    background: rgba(255, 193, 7, 0.2);
+    color: var(--text-light);
+    border-left: 4px solid #ffc107;
+}
+
+.alert-info {
+    background: rgba(23, 162, 184, 0.2);
+    color: var(--text-light);
+    border-left: 4px solid #17a2b8;
+}
+
+/* Badges sombres */
+.badge {
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.badge-success {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+    color: var(--text-light);
+}
+
+.badge-primary {
+    background: linear-gradient(135deg, var(--secondary-green) 0%, var(--dark-green) 100%);
+    color: var(--text-light);
+}
+
+/* Modales sombres */
+.modal-content {
+    background: linear-gradient(135deg, var(--bg-darker) 0%, #2d2d2d 100%);
+    border: 1px solid var(--border-green);
+    border-radius: 15px;
+    color: var(--text-light);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(45, 80, 22, 0.2) 100%);
+    border-bottom: 1px solid var(--border-green);
+}
+
+.modal-footer {
+    background: rgba(255, 255, 255, 0.02);
+    border-top: 1px solid var(--border-green);
+}
+
+/* Pagination sombre */
+.pagination .page-link {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-green);
+    color: var(--text-light);
+    transition: all 0.3s ease;
+}
+
+.pagination .page-link:hover {
+    background: rgba(127, 176, 105, 0.2);
+    border-color: var(--primary-green);
+    color: var(--text-light);
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+    border-color: var(--primary-green);
+    color: var(--text-light);
+}
+
+/* Titres sombres */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-light);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Liens sombres */
+a {
+    color: var(--primary-green);
+    transition: all 0.3s ease;
+}
+
+a:hover {
+    color: var(--accent-green);
+    text-shadow: 0 1px 3px rgba(127, 176, 105, 0.3);
+}
+
+/* Icônes sombres */
+.fas, .far, .fab {
+    color: var(--primary-green);
+    transition: all 0.3s ease;
+}
+
+.fas:hover, .far:hover, .fab:hover {
+    color: var(--accent-green);
+    transform: scale(1.1);
+}
+
+/* Sections héro sombres */
+.hero-section {
+    background: linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(45, 80, 22, 0.2) 100%);
+    border-radius: 20px;
+    padding: 3rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-green);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-green), var(--accent-green));
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Cartes de statistiques sombres */
+.stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-green);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(127, 176, 105, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.stat-card:hover::before {
+    left: 100%;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(127, 176, 105, 0.3);
+    border-color: rgba(127, 176, 105, 0.4);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--primary-green);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.stat-label {
+    color: var(--text-light);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Navigation sombre */
+.nav-tabs {
+    border-bottom: 1px solid var(--border-green);
+}
+
+.nav-tabs .nav-link {
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--primary-green);
+    background: rgba(127, 176, 105, 0.1);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--text-light);
+    background: linear-gradient(135deg, rgba(127, 176, 105, 0.2) 0%, rgba(45, 80, 22, 0.3) 100%);
+    border-bottom: 3px solid var(--primary-green);
+}
+
+/* Dropdown sombre */
+.dropdown-menu {
+    background: linear-gradient(135deg, var(--bg-darker) 0%, #2d2d2d 100%);
+    border: 1px solid var(--border-green);
+    border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.dropdown-item {
+    color: var(--text-light);
+    transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background: rgba(127, 176, 105, 0.2);
+    color: var(--text-light);
+}
+
+/* Scrollbar personnalisée */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, var(--accent-green) 0%, var(--primary-green) 100%);
+}
+
+/* Animations d'entrée */
+.fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Effets de lueur */
+.glow-effect {
+    box-shadow: 0 0 20px rgba(127, 176, 105, 0.3);
+    transition: all 0.3s ease;
+}
+
+.glow-effect:hover {
+    box-shadow: 0 0 30px rgba(127, 176, 105, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 1rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .hero-section {
+        padding: 2rem 1rem;
+    }
+} 
