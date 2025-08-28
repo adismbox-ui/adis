@@ -12,14 +12,15 @@ COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy project files
 COPY . .
 
-# Install PHP dependencies
 RUN composer install --optimize-autoloader --no-dev
 
-# Clear and cache config/routes
 RUN php artisan config:clear && php artisan route:clear
 
-# Run migrations, then start Laravel server
-CMD ["sh", "-c", "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=10000"]
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Run entrypoint
+CMD ["/usr/local/bin/docker-entrypoint.sh"]
