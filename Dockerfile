@@ -15,15 +15,11 @@ WORKDIR /var/www/html
 # Copy project files
 COPY . .
 
-# Install PHP dependencies (sans dev)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+# Install PHP dependencies
+RUN composer install --optimize-autoloader --no-dev
 
-# Cache Laravel config & routes (empêche plantage si .env absent en build)
-RUN php -r "file_exists('.env') || copy('.env.example', '.env');" \
-    && php artisan config:clear \
-    && php artisan route:clear
+# Clear and cache config/routes
+RUN php artisan config:clear && php artisan route:clear
 
-# Port exposé (Render utilise 10000 par défaut)
-EXPOSE 10000
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=10000
-
+# Run migrations, then start Laravel server
+CMD ["sh", "-c", "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=10000"]
