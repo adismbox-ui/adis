@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: adis
+    env: docker
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: APP_NAME
+        value: Laravel
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        value: base64:xE00X2iAqCAniXjAS3JHL8Ctu+nFxzsaWhvH6+roMJI=
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        value: https://adis.onrender.com
+
+      # --- Database (Postgres Render) ---
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        value: dpg-d2o3e23uibrs73fcupf0-a.oregon-postgres.render.com
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_DATABASE
+        value: adis_db
+      - key: DB_USERNAME
+        value: adis_db_user
+      - key: DB_PASSWORD
+        value: 77gPt7JgDDMgXODPpzcU28kOZCzJ0w0n
