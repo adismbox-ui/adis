@@ -29,6 +29,8 @@ class ForceHttpsMiddleware
      */
     private function isRenderEnvironment(): bool
     {
-        return !empty(env('RENDER')) || str_contains(env('APP_URL', ''), 'onrender.com');
+        return !empty(env('RENDER')) || 
+               str_contains(env('APP_URL', ''), 'onrender.com') ||
+               str_contains(env('APP_URL', ''), 'adis-ci.net');
     }
 }

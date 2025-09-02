@@ -14,7 +14,7 @@ services:
       - key: APP_DEBUG
         value: false
       - key: APP_URL
-        value: https://adis.onrender.com
+        value: https://adis-ci.net
       - key: RENDER
         value: true
       - key: FORCE_HTTPS
