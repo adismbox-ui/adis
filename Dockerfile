@@ -32,6 +32,12 @@ RUN php artisan config:clear && php artisan route:clear && php artisan view:clea
 # Supprimer .env (Render fournira ses propres variables)
 RUN rm .env || true
 
+# Configurer les permissions Laravel
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html \
+    && chmod -R 775 /var/www/html/storage \
+    && chmod -R 775 /var/www/html/bootstrap/cache
+
 # Copier le fichier Nginx
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
