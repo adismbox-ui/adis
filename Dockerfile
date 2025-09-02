@@ -16,7 +16,8 @@ COPY . .
 
 RUN composer install --optimize-autoloader --no-dev
 
-RUN php artisan config:clear && php artisan route:clear
+# Generate optimized autoloader and clear caches
+RUN php artisan config:clear && php artisan route:clear && php artisan view:clear
 
 # Copy entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

@@ -15,6 +15,10 @@ services:
         value: false
       - key: APP_URL
         value: https://adis.onrender.com
+      - key: RENDER
+        value: true
+      - key: FORCE_HTTPS
+        value: false
 
       # --- Database (Postgres Render) ---
       - key: DB_CONNECTION

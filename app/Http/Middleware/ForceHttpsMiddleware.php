@@ -16,11 +16,19 @@ class ForceHttpsMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        // Force HTTPS in production
-        if (!$request->secure() && app()->environment('production')) {
+        // Force HTTPS in production, but not on Render (which handles SSL automatically)
+        if (!$request->secure() && app()->environment('production') && !$this->isRenderEnvironment()) {
             return redirect()->secure($request->getRequestUri(), 301);
         }
 
         return $next($request);
+    }
+
+    /**
+     * Check if we're running on Render
+     */
+    private function isRenderEnvironment(): bool
+    {
+        return !empty(env('RENDER')) || str_contains(env('APP_URL', ''), 'onrender.com');
     }
 }
