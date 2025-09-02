@@ -1,18 +1,19 @@
 #!/bin/sh
 set -e
 
-# Attendre que la DB soit prête (optionnel)
-# until nc -z -v -w30 $DB_HOST $DB_PORT; do
-#   echo "En attente de la DB..."
-#   sleep 1
-# done
-
-# Exécuter les commandes Laravel
+# Nettoyer les caches Laravel
 php artisan config:clear
 php artisan route:clear
 php artisan view:clear
-php artisan migrate --force
 
-# Lancer PHP-FPM + Nginx
+# Vérifier si la DB est configurée et lancer migrations
+if [ -n "$DB_CONNECTION" ] && [ -n "$DB_HOST" ]; then
+    echo "Tentative de migration sur $DB_CONNECTION..."
+    php artisan migrate --force || echo "Migration échouée, mais on continue..."
+else
+    echo "Aucune base de données configurée, skip migrations."
+fi
+
+# Lancer Nginx + PHP-FPM
 service nginx start
 php-fpm
