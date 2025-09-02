@@ -9,7 +9,6 @@ class Question extends Model
     protected $fillable = ['questionnaire_id', 'texte', 'choix', 'bonne_reponse', 'points'];
 
     protected $casts = [
-        'choix' => 'array',
         'points' => 'integer',
     ];
 
@@ -43,6 +42,18 @@ class Question extends Model
         
         // Retourner un tableau vide par défaut
         return [];
+    }
+
+    /**
+     * Mutateur pour s'assurer que les choix sont toujours encodés en JSON
+     */
+    public function setChoixAttribute($value)
+    {
+        if (is_array($value)) {
+            $this->attributes['choix'] = json_encode($value, JSON_UNESCAPED_UNICODE);
+        } else {
+            $this->attributes['choix'] = $value;
+        }
     }
 
     public function questionnaire()

@@ -296,6 +296,7 @@
                 <li class="nav-item mb-2"><a class="nav-link" href="/mes-demandes-cours-maison"><i class="fas fa-home me-2"></i>Cours à domicile</a></li>
                 <li class="nav-item mb-2"><a class="nav-link" href="{{ route('achat') }}"><i class="fas fa-shopping-cart me-2"></i>Achat de module</a></li>
 <li class="nav-item mb-2"><a class="nav-link" href="{{ route('paiement.page') }}"><i class="fas fa-money-bill-wave me-2"></i>Paiement</a></li>
+                <li class="nav-item mb-2"><a class="nav-link" href="{{ route('apprenants.presence.index') }}"><i class="fas fa-user-check me-2"></i>Présence</a></li>
                 <li class="nav-item mb-2"><a class="nav-link" href="{{ route('apprenants.prifil_test') }}"><i class="fas fa-user me-2"></i>Profil</a></li>
                 <li class="nav-item mb-2"><a class="nav-link" href="{{ route('apprenants.notification_test') }}"><i class="fas fa-bell me-2"></i>Notifications</a></li>
                 <li class="nav-item mb-2"><a class="nav-link" href="{{ route('apprenants.parametre_test') }}"><i class="fas fa-cog me-2"></i>Paramètres du compte</a></li>

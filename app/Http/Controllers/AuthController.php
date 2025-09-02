@@ -120,7 +120,9 @@ class AuthController extends Controller
             'sexe' => $data['sexe'],
             'categorie' => $categorie,
             'telephone' => $data['telephone'] ?? null,
-            'actif' => true,
+            // Pour les apprenants et formateurs, le compte reste inactif jusqu'à activation (email pour apprenant, admin pour formateur)
+            'actif' => in_array($request->type_compte, ['apprenant', 'formateur'], true) ? false : true,
+            // Les formateurs n'ont pas besoin de vérification email, mais restent inactifs jusqu'à validation admin
             'email_verified_at' => ($request->type_compte === 'apprenant') ? null : now(),
             'infos_complementaires' => !empty($extra) ? json_encode($extra) : null,
             'verification_token' => $verification_token,
@@ -191,6 +193,10 @@ class AuthController extends Controller
             if (!$utilisateur->actif) {
                 return back()->withErrors(['email' => 'Votre compte est désactivé.'])->withInput();
             }
+            // Bloquer les apprenants non vérifiés par email
+            if ($utilisateur->type_compte === 'apprenant' && empty($utilisateur->email_verified_at)) {
+                return back()->withErrors(['email' => 'Veuillez vérifier votre adresse email pour activer votre compte.'])->withInput();
+            }
             \Auth::login($utilisateur);
             switch ($utilisateur->type_compte) {
                 case 'admin':
@@ -198,6 +204,11 @@ class AuthController extends Controller
                 case 'assistant':
                     return redirect('/assistant/dashboard');
                 case 'formateur':
+                    // Si formateur non validé par admin, bloquer
+                    if ($utilisateur->formateur && !$utilisateur->formateur->valide) {
+                        \Auth::logout();
+                        return back()->withErrors(['email' => "Votre compte formateur n'a pas encore été validé par l'administrateur."])->withInput();
+                    }
                     return redirect('/formateurs/dashboard');
                 case 'apprenant':
                     return redirect('/apprenants/dashboard');
@@ -219,18 +230,8 @@ class AuthController extends Controller
         $utilisateur->actif = true;
         $utilisateur->save();
         \Auth::login($utilisateur);
-        switch ($utilisateur->type_compte) {
-            case 'admin':
-                return redirect('/admin/dashboard')->with('success', 'Votre email a été vérifié.');
-            case 'assistant':
-                return redirect('/assistant/dashboard')->with('success', 'Votre email a été vérifié.');
-            case 'formateur':
-                return redirect('/formateurs/dashboard')->with('success', 'Votre email a été vérifié.');
-            case 'apprenant':
-                return redirect('/apprenants/dashboard')->with('success', 'Votre email a été vérifié.');
-            default:
-                return redirect('/')->with('success', 'Votre email a été vérifié.');
-        }
+        // Après vérification, rediriger vers la page d'accueil
+        return redirect('/')->with('success', 'Votre email a été vérifié.');
     }
 
     public function logout(Request $request)

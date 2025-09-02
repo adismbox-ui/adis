@@ -1,106 +1,144 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-5">
+<div class="container my-5">
     <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="card">
-                <div class="card-header bg-success text-white">Inscription</div>
-                <div class="card-body">
-                    <div id="step-indicator" class="mb-4 text-center d-none">
-                        <span class="badge bg-success step-badge" id="badge-step-1">1</span> <span>Informations générales</span>
-                        <span class="mx-2">→</span>
-                        <span class="badge bg-secondary step-badge" id="badge-step-2">2</span> <span id="step2-label">Complément</span>
-                        <span class="mx-2">→</span>
-                        <span class="badge bg-secondary step-badge" id="badge-step-3">3</span> <span>Confirmation</span>
+        <div class="col-12 col-lg-10 col-xl-8">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-success text-white py-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="mb-0">Inscription</h5>
+                            <small class="text-white-50">Créez votre compte en quelques étapes</small>
                         </div>
+                    </div>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <strong>Veuillez corriger les erreurs ci-dessous.</strong>
+                            <ul class="mb-0 mt-2">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                    <div id="step-indicator" class="mb-4 text-center d-none">
+                        <div class="d-flex align-items-center justify-content-center gap-3 flex-wrap">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge step-badge bg-success" id="badge-step-1">1</span>
+                                <span class="fw-semibold">Informations générales</span>
+                            </div>
+                            <span class="text-muted">→</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge step-badge bg-secondary" id="badge-step-2">2</span>
+                                <span class="fw-semibold" id="step2-label">Complément</span>
+                            </div>
+                            <span class="text-muted">→</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge step-badge bg-secondary" id="badge-step-3">3</span>
+                                <span class="fw-semibold">Confirmation</span>
+                            </div>
+                        </div>
+                    </div>
                     <form id="register-form" method="POST" action="{{ url('/register') }}" enctype="multipart/form-data">
                         @csrf
                         <!-- ÉTAPE 1 : Informations générales -->
                         <div class="step" id="step-1">
-                        <div class="row mb-3">
-                                <div class="col">
+                        <div class="row g-3 mb-3">
+                                <div class="col-md-6">
                                     <label for="prenom" class="form-label">Prénom(s)</label>
-                                    <input type="text" class="form-control" id="prenom" name="prenom" required>
+                                    <input type="text" class="form-control" id="prenom" name="prenom" value="{{ old('prenom') }}" required>
                                 </div>
-                            <div class="col">
-                                <label for="nom" class="form-label">Nom</label>
-                                <input type="text" class="form-control" id="nom" name="nom" required>
+                                <div class="col-md-6">
+                                    <label for="nom" class="form-label">Nom</label>
+                                    <input type="text" class="form-control" id="nom" name="nom" value="{{ old('nom') }}" required>
+                                </div>
                             </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="sexe" class="form-label">Sexe</label>
-                            <select class="form-select" id="sexe" name="sexe" required>
-                                <option value="">Choisir...</option>
-                                <option value="Homme">Homme</option>
-                                <option value="Femme">Femme</option>
-                            </select>
-                        </div>
-                            <div class="mb-3">
-                                <label for="telephone" class="form-label">Téléphone (WhatsApp)</label>
-                                <input type="text" class="form-control" id="telephone" name="telephone" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email (Gmail)</label>
-                                <input type="email" class="form-control" id="email" name="email" required>
+                            <div class="row g-3 mb-3">
+                                <div class="col-sm-6">
+                                    <label for="sexe" class="form-label">Sexe</label>
+                                    <select class="form-select" id="sexe" name="sexe" required>
+                                        <option value="">Choisir...</option>
+                                        <option value="Homme" {{ old('sexe')==='Homme' ? 'selected' : '' }}>Homme</option>
+                                        <option value="Femme" {{ old('sexe')==='Femme' ? 'selected' : '' }}>Femme</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="telephone" class="form-label">Téléphone (WhatsApp)</label>
+                                    <input type="text" class="form-control" id="telephone" name="telephone" value="{{ old('telephone') }}" required>
+                                </div>
                             </div>
                             <div class="mb-3">
-                                <label for="ville" class="form-label">Ville</label>
-                                <input type="text" class="form-control" id="ville" name="ville" required>
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" required>
+                                <div class="form-text">Nous enverrons un lien de vérification à cette adresse.</div>
                             </div>
-                            <div class="mb-3">
-                                <label for="commune" class="form-label">Commune</label>
-                                <input type="text" class="form-control" id="commune" name="commune" required>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label for="ville" class="form-label">Ville</label>
+                                    <input type="text" class="form-control" id="ville" name="ville" value="{{ old('ville') }}" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="commune" class="form-label">Commune</label>
+                                    <input type="text" class="form-control" id="commune" name="commune" value="{{ old('commune') }}" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="quartier" class="form-label">Quartier</label>
+                                    <input type="text" class="form-control" id="quartier" name="quartier" value="{{ old('quartier') }}" required>
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="quartier" class="form-label">Quartier</label>
-                                <input type="text" class="form-control" id="quartier" name="quartier" required>
+                            <div class="row g-3 mb-3">
+                                <div class="col-sm-6">
+                                    <label for="password" class="form-label">Mot de passe</label>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                    <div class="form-text">8+ caractères recommandés.</div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="password_confirmation" class="form-label">Confirmation du mot de passe</label>
+                                    <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Mot de passe</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password_confirmation" class="form-label">Confirmation du mot de passe</label>
-                                <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="type_compte" class="form-label">Type de compte</label>
-                            <select class="form-select" id="type_compte" name="type_compte" required>
-                                <option value="">Choisir...</option>
-                                @php($allowed = $allowedTypes ?? null)
-                                @if(!$allowed || in_array('admin', $allowed))
-                                    @unless(isset($adminExists) && $adminExists)
-                                        <option value="admin">Administrateur</option>
-                                    @endunless
-                                @endif
-                                @if(!$allowed || in_array('assistant', $allowed))
-                                    @unless(isset($assistantExists) && $assistantExists)
-                                        <option value="assistant">Assistant</option>
-                                    @endunless
-                                @endif
-                                @if(!$allowed || in_array('formateur', $allowed))
-                                    <option value="formateur">Formateur</option>
-                                @endif
-                                @if(!$allowed || in_array('apprenant', $allowed))
-                                    <option value="apprenant">Apprenant</option>
-                                @endif
-                            </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="categorie" class="form-label">Catégorie</label>
-                                <select class="form-select" id="categorie" name="categorie" required>
-                                    <option value="">Choisir...</option>
-                                    <option value="Enfant">Enfant</option>
-                                    <option value="Etudiant">Etudiant</option>
-                                    <option value="Professionnel">Professionnel</option>
-                                </select>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="type_compte" class="form-label">Type de compte</label>
+                                    <select class="form-select" id="type_compte" name="type_compte" required>
+                                        <option value="">Choisir...</option>
+                                        @php($allowed = $allowedTypes ?? null)
+                                        @if(!$allowed || in_array('admin', $allowed))
+                                            @unless(isset($adminExists) && $adminExists)
+                                                <option value="admin" {{ old('type_compte')==='admin' ? 'selected' : '' }}>Administrateur</option>
+                                            @endunless
+                                        @endif
+                                        @if(!$allowed || in_array('assistant', $allowed))
+                                            @unless(isset($assistantExists) && $assistantExists)
+                                                <option value="assistant" {{ old('type_compte')==='assistant' ? 'selected' : '' }}>Assistant</option>
+                                            @endunless
+                                        @endif
+                                        @if(!$allowed || in_array('formateur', $allowed))
+                                            <option value="formateur" {{ old('type_compte')==='formateur' ? 'selected' : '' }}>Formateur</option>
+                                        @endif
+                                        @if(!$allowed || in_array('apprenant', $allowed))
+                                            <option value="apprenant" {{ old('type_compte')==='apprenant' ? 'selected' : '' }}>Apprenant</option>
+                                        @endif
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="categorie" class="form-label">Catégorie</label>
+                                    <select class="form-select" id="categorie" name="categorie" required>
+                                        <option value="">Choisir...</option>
+                                        <option value="Enfant" {{ old('categorie')==='Enfant' ? 'selected' : '' }}>Enfant</option>
+                                        <option value="Etudiant" {{ old('categorie')==='Etudiant' ? 'selected' : '' }}>Etudiant</option>
+                                        <option value="Professionnel" {{ old('categorie')==='Professionnel' ? 'selected' : '' }}>Professionnel</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="d-flex justify-content-end" id="step1-next-group">
-                                <button type="button" class="btn btn-success" id="next-1">Suivant</button>
+                                <button type="button" class="btn btn-success px-4" id="next-1">Suivant</button>
                             </div>
                             <div class="d-flex justify-content-end d-none" id="step1-submit-group">
-                                <button type="submit" class="btn btn-success">S'inscrire</button>
+                                <button type="submit" class="btn btn-success px-4">S'inscrire</button>
                             </div>
                         </div>
                         <!-- ÉTAPE 2 : Dynamique -->
@@ -326,9 +364,9 @@
                                     <input type="file" class="form-control" name="fichier_diplome_general" accept=".pdf,image/*">
                                 </div>
                             </div>
-                            <div class="d-flex justify-content-between">
-                                <button type="button" class="btn btn-secondary" id="prev-2">Précédent</button>
-                                <button type="button" class="btn btn-success" id="next-2">Suivant</button>
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-outline-secondary" id="prev-2">Précédent</button>
+                                <button type="button" class="btn btn-success px-4" id="next-2">Suivant</button>
                             </div>
                         </div>
                         <!-- ÉTAPE 3 : Confirmation -->
@@ -341,9 +379,9 @@
                                 <h5>Activation de votre compte formateur</h5>
                                 <p>Nous vous remercions d'avoir fait confiance à ADIS. L'équipe ADIS analyse votre candidature. Un e-mail de confirmation avec un lien à cliquer vous sera envoyé dans un délai de 48H à l'adresse électronique fournie pour valider, compléter ou décliner votre offre.<br><br>L'équipe ADIS vous remercie.</p>
                             </div>
-                            <div class="d-flex justify-content-between">
-                                <button type="button" class="btn btn-secondary" id="prev-3">Précédent</button>
-                                <button type="submit" class="btn btn-success">Valider l'inscription</button>
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-outline-secondary" id="prev-3">Précédent</button>
+                                <button type="submit" class="btn btn-success px-4">Valider l'inscription</button>
                             </div>
                         </div>
                     </form>
@@ -352,6 +390,19 @@
         </div>
     </div>
 </div>
+@push('styles')
+<style>
+.step-badge {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.95rem;
+}
+</style>
+@endpush
 <script>
 // Gestion des étapes
 let currentStep = 1;
@@ -454,6 +505,22 @@ document.getElementById('type_compte').addEventListener('change', function() {
 updateStep2Content();
 showStep(1);
 updateCategorieOptions(); // Initialiser au chargement
+
+// Si retour avec erreurs, conserver le type et afficher l'étape 2 directement
+@if ($errors->any())
+    (function() {
+        var oldType = @json(old('type_compte'));
+        if (oldType) {
+            var typeSelect = document.getElementById('type_compte');
+            if (typeSelect) {
+                typeSelect.value = oldType;
+            }
+            updateCategorieOptions();
+            updateStep2Content();
+            showStep(2);
+        }
+    })();
+@endif
 
     // Afficher la liste des niveaux si apprenant
     function toggleNiveauDropdown() {

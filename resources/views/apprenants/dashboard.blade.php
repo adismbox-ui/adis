@@ -426,13 +426,20 @@
                 @if(!empty($modulesNonValides))
                     <div class="alert alert-danger-animated mb-4" style="font-size:1.1rem;">
                         <i class="fas fa-exclamation-triangle me-2 icon-animated"></i>
-                        <strong>Attention :</strong> Vous n'avez pas encore validé les modules suivants (moins de 60%) :
+                        <strong>Attention :</strong> Vous n'avez pas encore validé les modules suivants :
                         <ul class="mb-0 mt-2">
-                            @foreach($modulesNonValides as $modTitre)
-                                <li>{{ $modTitre }}</li>
+                            @foreach($modulesNonValides as $module)
+                                @if(is_array($module))
+                                    <li>
+                                        <strong>{{ $module['titre'] }}</strong> - {{ $module['pourcentage'] }}%
+                                        <br><small class="text-muted">{{ $module['raison'] }} ({{ $module['questionnaires_completes'] }}/{{ $module['total_questionnaires'] }} questionnaires complétés)</small>
+                                    </li>
+                                @else
+                                    <li>{{ $module }}</li>
+                                @endif
                             @endforeach
                         </ul>
-                        <span class="text-danger">Vous devez obtenir au moins 60% dans chaque module pour valider.</span>
+                        <span class="text-danger">Vous devez compléter TOUS les questionnaires (12 par module) ET obtenir au moins 60% de réussite.</span>
                     </div>
                 @endif
 
@@ -457,6 +464,8 @@
                                         <tr>
                                             <th>Module</th>
                                             <th>Pourcentage</th>
+                                            <th>Statut</th>
+                                            <th>Questionnaires</th>
                                             <th>Points obtenus</th>
                                             <th>Points possibles</th>
                                         </tr>
@@ -466,11 +475,26 @@
                                             <tr>
                                                 <td>{{ $mod['titre'] }}</td>
                                                 <td><span class="badge badge-3d">{{ $mod['pourcentage'] }}%</span></td>
+                                                <td>
+                                                    @if($mod['valide'] ?? false)
+                                                        <span class="badge bg-success">✓ Validé</span>
+                                                    @elseif($mod['complet'] ?? false)
+                                                        <span class="badge bg-warning">⏳ Complet</span>
+                                                    @else
+                                                        <span class="badge bg-danger">✗ Non validé</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <small>{{ $mod['questionnaires_completes'] ?? 0 }}/{{ $mod['total_questionnaires'] ?? 0 }}</small>
+                                                    @if(($mod['total_questionnaires'] ?? 0) < 12)
+                                                        <br><small class="text-warning">(12 requis)</small>
+                                                    @endif
+                                                </td>
                                                 <td>{{ $mod['points_obtenus'] }}</td>
                                                 <td>{{ $mod['points_possibles'] }}</td>
                                             </tr>
                                         @empty
-                                            <tr><td colspan="4" class="text-center">Aucun module trouvé pour ce niveau.</td></tr>
+                                            <tr><td colspan="6" class="text-center">Aucun module trouvé pour ce niveau.</td></tr>
                                         @endforelse
                                     </tbody>
                                 </table>

@@ -69,6 +69,8 @@
             inset 0 1px 0 rgba(255, 255, 255, 0.1);
         border: 1px solid rgba(16, 185, 129, 0.2);
         animation: fadeInUp 0.8s ease-out;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     /* Table principale */
@@ -79,6 +81,7 @@
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
         border: none;
         margin: 0;
+        min-width: 1000px;
     }
 
     /* En-têtes du tableau */
@@ -377,6 +380,7 @@
                     <th><i class="fas fa-envelope me-2"></i>Email</th>
                     <th><i class="fas fa-phone me-2"></i>Téléphone</th>
                     <th><i class="fas fa-shield-alt me-2"></i>Statut</th>
+                    <th><i class="fas fa-layer-group me-2"></i>Niveaux</th>
                     <th><i class="fas fa-cogs me-2"></i>Actions</th>
         </tr>
     </thead>
@@ -400,6 +404,15 @@
                             <span class="badge-status">
                                 <i class="fas fa-{{ $actif ? 'check-circle' : 'ban' }} me-1"></i>{{ $actif ? 'Actif' : 'Désactivé' }}
                             </span>
+                        </td>
+                        <td>
+                            @if($formateur->niveaux && $formateur->niveaux->count())
+                                @foreach($formateur->niveaux as $niveau)
+                                    <span class="badge bg-secondary me-1 mb-1"><i class="fas fa-layer-group me-1"></i>{{ $niveau->nom }}</span>
+                                @endforeach
+                            @else
+                                <span class="text-muted">Aucun</span>
+                            @endif
                         </td>
                 <td>
                             <a href="{{ route('formateurs.show', $formateur) }}" class="btn-action" title="Voir">

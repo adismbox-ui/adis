@@ -42,4 +42,9 @@ class Niveau extends Model
     {
         return $this->belongsTo(\App\Models\SessionFormation::class, 'session_id');
     }
+
+    public function apprenants()
+    {
+        return $this->hasMany(\App\Models\Apprenant::class, 'niveau_id');
+    }
 } 

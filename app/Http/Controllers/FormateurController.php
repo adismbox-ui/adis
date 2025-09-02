@@ -13,7 +13,7 @@ class FormateurController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Formateur::with('utilisateur');
+        $query = Formateur::with(['utilisateur', 'niveaux']);
         $search = trim((string) $request->query('q', ''));
         if ($search !== '') {
             $query->where(function($q) use ($search) {

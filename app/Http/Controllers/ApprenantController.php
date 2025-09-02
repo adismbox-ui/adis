@@ -431,7 +431,7 @@ class ApprenantController extends Controller
             $modules = \App\Models\Module::where('niveau_id', $apprenant->niveau_id)->orderBy('titre')->get();
         }
 
-        // --- NOUVEAU CALCUL : MOYENNE DES POURCENTAGES PAR MODULE ---
+        // --- CALCUL AVEC PONDÉRATION PAR TYPE (SYNCHRONISÉ AVEC L'API) ---
         $moyenneModules = 0;
         $nbModules = 0;
         $totalPoints = 0; // Pour compatibilité, mais n'est plus affiché
@@ -443,9 +443,88 @@ class ApprenantController extends Controller
             $modulesNiveau = \App\Models\Module::where('niveau_id', $niveauId)->get();
             $nbModules = $modulesNiveau->count();
             $sommePourcentages = 0;
+            
             foreach ($modulesNiveau as $module) {
                 // Récupérer tous les questionnaires du module
                 $questionnaires = \App\Models\Questionnaire::where('module_id', $module->id)->get();
+                
+                // Vérifier que tous les questionnaires sont complétés
+                $questionnairesCompletes = 0;
+                $totalQuestionnaires = $questionnaires->count();
+                
+                // Si aucun questionnaire n'est créé, le module ne peut pas être validé
+                if ($totalQuestionnaires === 0) {
+                    $moduleComplet = false;
+                    $moduleValide = false;
+                    $pourcentageModule = 0;
+                } else {
+                    // Calculer le pourcentage selon le type de questionnaire avec pondération
+                    $pourcentageCalcule = 0;
+                    $questionnairesParType = [];
+                    
+                    foreach ($questionnaires as $questionnaire) {
+                        $type = $questionnaire->type_devoir;
+                        
+                        // Compter les bonnes réponses
+                        $questionsReponduesCorrectement = 0;
+                        foreach ($questionnaire->questions as $question) {
+                            $reponse = \App\Models\ReponseQuestionnaire::where('apprenant_id', $apprenant->id)
+                                ->where('question_id', $question->id)
+                                ->first();
+                            
+                            if ($reponse && $reponse->reponse === $question->bonne_reponse) {
+                                $questionsReponduesCorrectement++;
+                            }
+                        }
+                        
+                        $totalQuestionsQuestionnaire = $questionnaire->questions->count();
+                        $pourcentageQuestionnaire = ($totalQuestionsQuestionnaire > 0) ? ($questionsReponduesCorrectement / $totalQuestionsQuestionnaire) * 100 : 0;
+                        
+                        // Pondération selon le type
+                        $ponderation = 0;
+                        switch ($type) {
+                            case 'hebdomadaire':
+                                $ponderation = 2; // 2% par semaine
+                                break;
+                            case 'mensuel':
+                                $ponderation = 8; // 8% par mois
+                                break;
+                            case 'final':
+                                $ponderation = 66; // 66% final
+                                break;
+                        }
+                        
+                        $pourcentageCalcule += ($pourcentageQuestionnaire * $ponderation) / 100;
+                        
+                        if (!isset($questionnairesParType[$type])) {
+                            $questionnairesParType[$type] = [
+                                'completes' => 0,
+                                'total' => 0,
+                                'pourcentage' => 0
+                            ];
+                        }
+                        
+                        if ($questionsReponduesCorrectement === $totalQuestionsQuestionnaire) {
+                            $questionnairesCompletes++;
+                            $questionnairesParType[$type]['completes']++;
+                        }
+                        $questionnairesParType[$type]['total']++;
+                        $questionnairesParType[$type]['pourcentage'] += $pourcentageQuestionnaire;
+                    }
+                    
+                    // Normaliser les pourcentages par type
+                    foreach ($questionnairesParType as $type => $data) {
+                        if ($data['total'] > 0) {
+                            $questionnairesParType[$type]['pourcentage'] = $data['pourcentage'] / $data['total'];
+                        }
+                    }
+                    
+                    $moduleComplet = ($questionnairesCompletes === $totalQuestionnaires);
+                    $moduleValide = ($moduleComplet && $pourcentageCalcule >= 60);
+                    $pourcentageModule = $pourcentageCalcule; // Utiliser le pourcentage pondéré
+                }
+                
+                // Calculer aussi les points pour compatibilité d'affichage
                 $questions = collect();
                 foreach ($questionnaires as $q) {
                     $questions = $questions->merge($q->questions);
@@ -461,40 +540,63 @@ class ApprenantController extends Controller
                         $pointsObtenus += $q->points ?? 1;
                     }
                 }
-                $pourcentageModule = ($pointsPossibles > 0) ? ($pointsObtenus / $pointsPossibles) * 100 : 0;
-                // Validation automatique du module
+                
+                // Validation automatique du module avec nouvelle logique
                 $inscription = \App\Models\Inscription::where('apprenant_id', $apprenant->id)
                     ->where('module_id', $module->id)
                     ->first();
+                    
                 if ($inscription) {
-                    if ($pourcentageModule >= 60 && $inscription->statut !== 'valide') {
+                    if ($moduleValide && $inscription->statut !== 'valide') {
                         $inscription->statut = 'valide';
                         $inscription->save();
-                    } elseif ($pourcentageModule < 60 && $inscription->statut === 'valide') {
+                    } elseif (!$moduleValide && $inscription->statut === 'valide') {
                         $inscription->statut = 'en_attente';
                         $inscription->save();
                     }
                 }
-                if ($pourcentageModule < 60) {
-                    $modulesNonValides[] = $module->titre;
+                
+                if (!$moduleValide) {
+                    $modulesNonValides[] = [
+                        'titre' => $module->titre,
+                        'pourcentage' => round($pourcentageModule, 2),
+                        'questionnaires_completes' => $questionnairesCompletes ?? 0,
+                        'total_questionnaires' => $totalQuestionnaires,
+                        'questionnaires_attendus' => 12,
+                        'module_complet' => $moduleComplet ?? false,
+                        'raison' => $totalQuestionnaires === 0 ? 'Aucun questionnaire créé' : 
+                                   ($totalQuestionnaires < 12 ? 'Questionnaires manquants (12 requis)' : 
+                                   (!($moduleComplet ?? false) ? 'Questionnaires incomplets' : 'Score insuffisant'))
+                    ];
                 }
+                
                 $sommePourcentages += $pourcentageModule;
                 $modulesPourcentages[] = [
                     'titre' => $module->titre,
                     'pourcentage' => round($pourcentageModule, 2),
                     'points_obtenus' => $pointsObtenus,
                     'points_possibles' => $pointsPossibles,
+                    'valide' => $moduleValide ?? false,
+                    'complet' => $moduleComplet ?? false,
+                    'questionnaires_completes' => $questionnairesCompletes ?? 0,
+                    'total_questionnaires' => $totalQuestionnaires,
+                    'questionnaires_attendus' => 12,
+                    'questionnaires_par_type' => $questionnairesParType ?? []
                 ];
             }
+            
             if ($nbModules > 0) {
                 $moyenneModules = $sommePourcentages / $nbModules;
             }
             $pourcentage = round($moyenneModules, 2); // Pour affichage
         }
-        // --- PROGRESSION DE NIVEAU AVEC NOUVELLE LOGIQUE ---
+        // --- PROGRESSION DE NIVEAU AVEC NOUVELLE LOGIQUE SYNCHRONISÉE ---
         $nextNiveau = null;
-        // Passage de niveau : il faut que tous les modules soient à 60% ou plus
-        if ($apprenant && $apprenant->niveau_id && $pourcentage >= 60 && empty($modulesNonValides)) {
+        // Passage de niveau : il faut que tous les modules soient validés ET que la moyenne soit ≥ 60%
+        $tousModulesValides = empty($modulesNonValides);
+        $moyenneSuffisante = ($pourcentage >= 60);
+        
+        if ($apprenant && $apprenant->niveau_id && $tousModulesValides && $moyenneSuffisante) {
             $currentNiveau = $apprenant->niveau;
             $nextNiveau = \App\Models\Niveau::where('ordre', '>', $currentNiveau->ordre ?? 0)
                 ->orderBy('ordre')

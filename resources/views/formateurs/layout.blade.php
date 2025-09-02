@@ -414,6 +414,9 @@
                 <a class="nav-link {{ request()->is('formateurs/questionnaires') ? 'active' : '' }}" href="{{ route('formateurs.questionnaires') }}">
                     <i class="fas fa-question-circle me-3"></i> <span>Questionnaires</span>
                 </a>
+                <a class="nav-link {{ request()->is('formateurs/presence*') ? 'active' : '' }}" href="{{ route('formateurs.presence.index') }}">
+                    <i class="fas fa-user-check me-3"></i> <span>Présence</span>
+                </a>
                 <a class="nav-link {{ request()->is('formateurs/apprenants*') ? 'active' : '' }}" href="{{ route('formateurs.apprenants.index') }}">
                     <i class="fas fa-users me-3"></i> <span>Apprenants</span>
                 </a>

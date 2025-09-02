@@ -77,4 +77,60 @@ class SessionFormation extends Model
         }
         return $this->nombre_inscrits >= $this->places_max;
     }
+
+    /**
+     * Vérifie si la session est active
+     */
+    public function estActive()
+    {
+        return $this->actif && 
+               $this->date_debut && 
+               $this->date_fin && 
+               now()->between($this->date_debut, $this->date_fin);
+    }
+
+    /**
+     * Vérifie si la session est gratuite
+     */
+    public function estGratuite()
+    {
+        return $this->prix === null || $this->prix == 0;
+    }
+
+    /**
+     * Active la session
+     */
+    public function activer($prix = null)
+    {
+        $this->actif = true;
+        if ($prix !== null) {
+            $this->prix = $prix;
+        }
+        $this->save();
+        return $this;
+    }
+
+    /**
+     * Désactive la session
+     */
+    public function desactiver()
+    {
+        $this->actif = false;
+        $this->save();
+        return $this;
+    }
+
+    /**
+     * Obtient le statut du prix de la session
+     */
+    public function getStatutPrixAttribute()
+    {
+        if ($this->prix === null) {
+            return 'gratuit';
+        } elseif ($this->prix == 0) {
+            return 'gratuit';
+        } else {
+            return 'payant';
+        }
+    }
 } 

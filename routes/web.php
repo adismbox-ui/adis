@@ -17,6 +17,10 @@ use App\Http\Controllers\SessionFormationController;
 use App\Http\Controllers\VacanceController;
 use App\Http\Controllers\AssistantController;
 use App\Http\Controllers\AdminProjetController;
+use App\Http\Controllers\PresenceController;
+
+Route::pattern('formateur', '[0-9]+');
+Route::pattern('apprenant', '[0-9]+');
 
 Route::get('/', function () {
     return view('welcome');
@@ -294,7 +298,31 @@ Route::get('/parametre_test', function () {
 Route::get('/questionnaire_test', [App\Http\Controllers\QuestionnaireController::class, 'apprenantTest'])->middleware('auth')->name('apprenants.questionnaire_test');
 });
 
-Route::get('/sessions/calendrier', [SessionFormationController::class, 'calendrier'])->name('admin.sessions.calendrier');
+// Presence routes
+Route::middleware(['auth'])->group(function () {
+    // Formateur
+    Route::get('/formateurs/presence', [PresenceController::class, 'formateurIndex'])->name('formateurs.presence.index');
+    Route::post('/formateurs/presence/open', [PresenceController::class, 'formateurOpen'])->name('formateurs.presence.open');
+    Route::post('/formateurs/presence/{presenceRequest}/close', [PresenceController::class, 'formateurClose'])->name('formateurs.presence.close');
+    Route::get('/formateurs/presence/{presenceRequest}/feuille', [PresenceController::class, 'formateurSheet'])->name('formateurs.presence.sheet');
+    Route::get('/formateurs/presence/{presenceRequest}/debug', [PresenceController::class, 'formateurDebug'])->name('formateurs.presence.debug');
+    Route::get('/formateurs/present-format', [PresenceController::class, 'presentFormat'])->name('formateurs.present.format');
+    Route::get('/formateurs/presentformat', [PresenceController::class, 'presentFormat'])->name('formateurs.present.format.alias1');
+    Route::get('/formateurs/present_format', [PresenceController::class, 'presentFormat'])->name('formateurs.present.format.alias2');
+
+    // Apprenant
+    Route::get('/apprenants/presence', [PresenceController::class, 'apprenantIndex'])->name('apprenants.presence.index');
+    Route::post('/apprenants/presence/mark', [PresenceController::class, 'apprenantMark'])->name('apprenants.presence.mark');
+
+    // Admin
+    Route::get('/admin/presence', [PresenceController::class, 'adminIndex'])->name('admin.presence.index');
+    Route::get('/admin/presence/{presenceRequest}/pdf', [PresenceController::class, 'adminPdf'])->name('admin.presence.pdf');
+});
+
+// Test route to diagnose 404 issues quickly
+Route::get('/test-present-format', function () {
+	return response('OK present-format test', 200);
+});
 
 // Routes dashboard apprenant et pages associées
 Route::middleware(['auth'])->group(function () {
@@ -496,4 +524,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::get('/certificats/{certificat}/image-model', [CertificatController::class, 'generateCertificatImageFromModel'])->name('certificats.image-model');
     Route::get('/certificats/{certificat}/generator', [CertificatController::class, 'showCertificateGenerator'])->name('certificats.generator');
     Route::get('/certificats/{certificat}/generate-with-state', [CertificatController::class, 'generateWithSavedState'])->name('certificats.generate-with-state');
+});
+
+// Diagnostic routes (public) to isolate 404 causes
+Route::get('/present-format', [\App\Http\Controllers\PresenceController::class, 'presentFormat'])->name('present.format.public');
+Route::get('/formateurs/present-format-debug', function () {
+	return response('OK formateurs present-format debug', 200);
+});
+Route::get('/apprenants/presence-debug', function () {
+	return response('OK apprenants presence debug', 200);
 });

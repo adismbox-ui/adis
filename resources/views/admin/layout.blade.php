@@ -885,6 +885,12 @@ window.addEventListener('DOMContentLoaded', function() {
                     </svg>
                     <span class="admin-nav-text">Paiements</span>
                 </a>
+                <a href="{{ route('admin.presence.index') }}" class="admin-nav-item {{ request()->is('admin/presence*') ? 'active' : '' }}">
+                    <svg class="admin-nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                    <span class="admin-nav-text">Présence</span>
+                </a>
                 <a href="{{ route('admin.certificats.index') }}" class="admin-nav-item {{ request()->is('admin/certificats*') ? 'active' : '' }}">
                     <svg class="admin-nav-icon" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M17 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h10zm0 2H7v14h10V5zm-5 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm0 6c2.67 0 8 1.34 8 4v2H4v-2c0-2.66 5.33-4 8-4z"/>

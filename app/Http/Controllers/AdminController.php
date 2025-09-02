@@ -173,6 +173,9 @@ class AdminController extends Controller
         // Envoi d'un email au formateur validé
         $utilisateur = $formateur->utilisateur;
         if ($utilisateur) {
+            // Activer le compte utilisateur du formateur à la validation admin
+            $utilisateur->actif = true;
+            $utilisateur->save();
             $autoLoginUrl = url('/formateur/auto-login/' . $token);
             Mail::raw(
                 "Bonjour " . $utilisateur->prenom . ",\n\nVotre compte formateur a été validé par l'administrateur.\nCliquez sur ce lien pour accéder directement à votre espace formateur :\n" . $autoLoginUrl . "\n\nCe lien est à usage unique.\n\nL'équipe ADIS.",
