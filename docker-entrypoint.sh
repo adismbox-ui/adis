@@ -23,11 +23,6 @@ else
     echo "Aucune DB PostgreSQL configurée, skip migrations."
 fi
 
-# Lancer PHP-FPM en arrière-plan puis Nginx
+# Démarrer PHP-FPM et Nginx
 php-fpm -D
-
-# Attendre que PHP-FPM soit prêt
-sleep 2
-
-# Lancer Nginx en premier plan
 nginx -g "daemon off;"
