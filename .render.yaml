@@ -31,3 +31,9 @@ services:
         value: adis_db_user
       - key: DB_PASSWORD
         value: 77gPt7JgDDMgXODPpzcU28kOZCzJ0w0n
+      
+      # --- Session Driver ---
+      - key: SESSION_DRIVER
+        value: file
+      - key: LOG_CHANNEL
+        value: single
