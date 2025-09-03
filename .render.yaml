@@ -21,6 +21,8 @@ services:
         value: true
       - key: SESSION_SECURE_COOKIE
         value: true
+      - key: TRUSTED_PROXIES
+        value: "*"
       - key: PUPPETEER_EXECUTABLE_PATH
         value: /usr/bin/chromium-browser
 
