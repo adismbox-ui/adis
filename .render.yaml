@@ -15,6 +15,12 @@ services:
         value: true
       - key: APP_URL
         value: https://adis-ci.net
+      - key: FORCE_HTTPS
+        value: true
+      - key: SECURE_COOKIES
+        value: true
+      - key: SESSION_SECURE_COOKIE
+        value: true
       - key: PUPPETEER_EXECUTABLE_PATH
         value: /usr/bin/chromium-browser
 
