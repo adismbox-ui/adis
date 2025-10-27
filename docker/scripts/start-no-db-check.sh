@@ -10,6 +10,14 @@ if [ -z "$APP_KEY" ]; then
     php artisan key:generate --force
 fi
 
+# Attendre un peu que la base de données soit prête
+echo "⏳ Attente de la base de données..."
+sleep 10
+
+# Exécuter les migrations en arrière-plan
+echo "📊 Exécution des migrations en arrière-plan..."
+php artisan migrate --force &
+
 # Optimiser l'application pour la production
 echo "⚡ Optimisation de l'application..."
 php artisan config:cache
