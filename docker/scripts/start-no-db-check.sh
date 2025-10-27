@@ -1,22 +1,8 @@
 #!/bin/bash
 
-# Script de démarrage pour Laravel avec Docker
+# Script de démarrage alternatif pour Laravel avec Docker
 
 echo "🚀 Démarrage de l'application Laravel..."
-
-# Attendre que la base de données soit prête (avec timeout)
-echo "⏳ Attente de la base de données..."
-timeout=60
-counter=0
-while ! php artisan migrate:status > /dev/null 2>&1; do
-    if [ $counter -ge $timeout ]; then
-        echo "⚠️ Timeout atteint, démarrage sans vérification de la base de données..."
-        break
-    fi
-    echo "En attente de la connexion à la base de données... ($counter/$timeout)"
-    sleep 2
-    counter=$((counter + 2))
-done
 
 # Générer la clé d'application si elle n'existe pas
 if [ -z "$APP_KEY" ]; then

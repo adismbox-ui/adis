@@ -50,7 +50,9 @@ RUN mkdir -p /var/log/laravel && chown -R www-data:www-data /var/log/laravel
 
 # Copier les scripts de démarrage
 COPY docker/scripts/start.sh /usr/local/bin/start.sh
+COPY docker/scripts/start-no-db-check.sh /usr/local/bin/start-no-db-check.sh
 RUN chmod +x /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start-no-db-check.sh
 
 # Copier la configuration supervisor pour les tâches cron
 COPY docker/supervisor/laravel-worker.conf /etc/supervisor/conf.d/laravel-worker.conf
@@ -58,5 +60,5 @@ COPY docker/supervisor/laravel-worker.conf /etc/supervisor/conf.d/laravel-worker
 # Exposer le port 80
 EXPOSE 80
 
-# Script de démarrage
-CMD ["/usr/local/bin/start.sh"]
+# Script de démarrage (utilise le script sans vérification DB)
+CMD ["/usr/local/bin/start-no-db-check.sh"]
