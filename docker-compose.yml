@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: adis-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./storage:/var/www/html/storage
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    environment:
+      - APP_NAME=ADIS
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_URL=https://adis-frontend-svngue-0589c7-45-130-104-114.traefik.me
+      - APP_KEY=${APP_KEY}
+      
+      # Configuration de base de données MySQL Dokploy
+      - DB_CONNECTION=mysql
+      - DB_HOST=adis-database-rjki7t
+      - DB_PORT=3306
+      - DB_DATABASE=mysql
+      - DB_USERNAME=mysql
+      - DB_PASSWORD=pw18jkayq10rlx3x
+      
+      # Configuration de cache et sessions
+      - CACHE_STORE=database
+      - SESSION_DRIVER=database
+      - QUEUE_CONNECTION=database
+      
+      # Configuration mail
+      - MAIL_MAILER=smtp
+      - MAIL_HOST=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USERNAME=adis.mbox@gmail.com
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_ENCRYPTION=tls
+      - MAIL_FROM_ADDRESS=adis.mbox@gmail.com
+      - MAIL_FROM_NAME=ADIS
+    depends_on:
+      - redis
+    networks:
+      - adis-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.adis.rule=Host(`adis-frontend-svngue-0589c7-45-130-104-114.traefik.me`)"
+      - "traefik.http.routers.adis.entrypoints=websecure"
+      - "traefik.http.routers.adis.tls.certresolver=letsencrypt"
+      - "traefik.http.services.adis.loadbalancer.server.port=80"
+
+  redis:
+    image: redis:7-alpine
+    container_name: adis-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - adis-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: adis-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - adis-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx.rule=Host(`adis-frontend-svngue-0589c7-45-130-104-114.traefik.me`)"
+      - "traefik.http.routers.nginx.entrypoints=websecure"
+      - "traefik.http.routers.nginx.tls.certresolver=letsencrypt"
+      - "traefik.http.services.nginx.loadbalancer.server.port=80"
+
+volumes:
+  redis_data:
+
+networks:
+  adis-network:
+    driver: bridge
