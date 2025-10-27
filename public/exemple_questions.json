@@ -1,0 +1,24 @@
+[
+    {
+        "texte": "Quelle est la capitale de la France ?",
+        "choix": [
+            "Paris",
+            "Londres",
+            "Berlin",
+            "Madrid"
+        ],
+        "bonne_reponse": "Paris",
+        "points": 1
+    },
+    {
+        "texte": "Combien font 2 + 2 ?",
+        "choix": [
+            "3",
+            "4",
+            "5",
+            "6"
+        ],
+        "bonne_reponse": "4",
+        "points": 1
+    }
+]
