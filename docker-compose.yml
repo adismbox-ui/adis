@@ -13,7 +13,7 @@ services:
       - APP_NAME=ADIS
       - APP_ENV=production
       - APP_DEBUG=false
-      - APP_URL=https://adis-frontend-svngue-0589c7-45-130-104-114.traefik.me
+      - APP_URL=https://adis-ci.net
       - APP_KEY=${APP_KEY}
       
       # Configuration de base de données MySQL Dokploy
