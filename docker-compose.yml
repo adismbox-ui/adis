@@ -44,7 +44,7 @@ services:
       - adis-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.adis.rule=Host(`adis-frontend-svngue-0589c7-45-130-104-114.traefik.me`)"
+      - "traefik.http.routers.adis.rule=Host(`adis-ci.net`) || Host(`www.adis-ci.net`) || Host(`adis-frontend-svngue-0589c7-45-130-104-114.traefik.me`)"
       - "traefik.http.routers.adis.entrypoints=websecure"
       - "traefik.http.routers.adis.tls.certresolver=letsencrypt"
       - "traefik.http.services.adis.loadbalancer.server.port=80"
@@ -74,7 +74,7 @@ services:
       - adis-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.nginx.rule=Host(`adis-frontend-svngue-0589c7-45-130-104-114.traefik.me`)"
+      - "traefik.http.routers.nginx.rule=Host(`adis-ci.net`) || Host(`www.adis-ci.net`) || Host(`adis-frontend-svngue-0589c7-45-130-104-114.traefik.me`)"
       - "traefik.http.routers.nginx.entrypoints=websecure"
       - "traefik.http.routers.nginx.tls.certresolver=letsencrypt"
       - "traefik.http.services.nginx.loadbalancer.server.port=80"
