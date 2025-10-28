@@ -75,8 +75,6 @@ class AuthController extends Controller
         } elseif ($request->type_compte === 'formateur') {
             $rules = array_merge($rules, [
                 'categorie' => 'required|in:Enfant,Etudiant,Professionnel',
-                'fichier_diplome_religieux' => 'nullable|file|mimes:pdf,jpg,jpeg,png',
-                'fichier_diplome_general' => 'nullable|file|mimes:pdf,jpg,jpeg,png',
             ]);
             $extra = [
                 'connaissance_adis' => $request->connaissance_adis_formateur,
@@ -90,13 +88,6 @@ class AuthController extends Controller
                 'categorie' => $request->categorie,
             ];
             $categorie = $request->categorie;
-            // Gestion upload fichiers
-            if ($request->hasFile('fichier_diplome_religieux')) {
-                $extra['fichier_diplome_religieux'] = $request->file('fichier_diplome_religieux')->store('diplomes/religieux', 'public');
-            }
-            if ($request->hasFile('fichier_diplome_general')) {
-                $extra['fichier_diplome_general'] = $request->file('fichier_diplome_general')->store('diplomes/general', 'public');
-            }
         } else {
             // Pour admin/assistant, catégorie non requise
             $categorie = null;

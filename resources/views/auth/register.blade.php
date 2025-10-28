@@ -355,14 +355,6 @@
                                         <option>AUTRE</option>
                             </select>
                         </div>
-                        <div class="mb-3">
-                                    <label class="form-label">Téléchargez une copie de votre dernier diplôme en sciences religieuses</label>
-                                    <input type="file" class="form-control" name="fichier_diplome_religieux" accept=".pdf,image/*">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Téléchargez une copie de votre dernier diplôme en sciences générales</label>
-                                    <input type="file" class="form-control" name="fichier_diplome_general" accept=".pdf,image/*">
-                                </div>
                             </div>
                             <div class="d-flex justify-content-between mt-4">
                                 <button type="button" class="btn btn-outline-secondary" id="prev-2">Précédent</button>
