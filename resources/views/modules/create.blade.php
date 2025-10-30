@@ -371,9 +371,6 @@ body {
                                 <button type="submit" class="btn btn-primary btn-lg px-5">
                                     <i class="fas fa-save me-2"></i> Enregistrer
                                 </button>
-                                <button type="button" class="btn btn-success btn-lg px-5" onclick="enregistrerTousNiveaux()">
-                                    <i class="fas fa-layer-group me-2"></i> Enregistrer dans tous les Niveaux
-                                </button>
                             </div>
                         </div>
                     </form>
