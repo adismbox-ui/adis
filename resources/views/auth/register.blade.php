@@ -285,6 +285,9 @@
                                         <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Langue arabe"> <label class="form-check-label">Langue arabe</label>
                                     </div>
                                     <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Lecture coranique"> <label class="form-check-label">Lecture coranique</label>
+                                    </div>
+                                    <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Fiqh"> <label class="form-check-label">Le Fiqh</label>
                                     </div>
                                     <div class="form-check">
