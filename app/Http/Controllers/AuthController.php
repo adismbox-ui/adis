@@ -78,11 +78,8 @@ class AuthController extends Controller
             ]);
             $extra = [
                 'disciplines' => $request->disciplines_formateur ?? [],
-                'niveau_coranique' => $request->niveau_coranique_formateur,
                 'niveau_arabe' => $request->niveau_arabe_formateur,
                 'niveau_francais' => $request->niveau_francais_formateur,
-                'experience_enseignement' => $request->experience_enseignement_formateur,
-                'annees_experience' => $request->annees_experience_formateur,
                 'deja_enseigne_adis' => $request->deja_enseigne_adis_formateur,
                 'enseignement_domicile' => $request->enseignement_domicile_formateur,
                 'diplome_religieux' => $request->diplome_religieux_formateur,

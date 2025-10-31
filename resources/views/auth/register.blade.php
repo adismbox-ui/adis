@@ -285,39 +285,11 @@
                                         <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Langue arabe"> <label class="form-check-label">Langue arabe</label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Tajwîd"> <label class="form-check-label">Le Tajwîd</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Tahfîz"> <label class="form-check-label">Le Tahfîz</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Tafsîr"> <label class="form-check-label">Le Tafsîr</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Hadith"> <label class="form-check-label">Le hadith</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="As-Sîra"> <label class="form-check-label">As-Sîra</label>
-                                    </div>
-                                    <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Fiqh"> <label class="form-check-label">Le Fiqh</label>
                                     </div>
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Anglais"> <label class="form-check-label">Anglais</label>
                                     </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Tomes de Médine"> <label class="form-check-label">Tomes de Médine</label>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Quel est votre niveau de lecture coranique ?</label>
-                                    <select class="form-select" name="niveau_coranique_formateur">
-                                        <option value="">Choisir...</option>
-                                        <option>Excellent</option>
-                                        <option>Très bon</option>
-                                        <option>Bon</option>
-                                        <option>Moyen</option>
-                                    </select>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Quel est votre niveau en langue arabe ?</label>
@@ -339,20 +311,6 @@
                                         <option>Intermédiaire</option>
                                         <option>Débutant</option>
                                     </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Avez-vous une expérience en enseignement ?</label>
-                                    <select class="form-select" name="experience_enseignement_formateur">
-                                        <option value="">Choisir...</option>
-                                        <option>Oui, plusieurs années</option>
-                                        <option>Oui, quelques années</option>
-                                        <option>Oui, peu d'expérience</option>
-                                        <option>Non</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Nombre d'années d'expérience en enseignement</label>
-                                    <input type="number" class="form-control" name="annees_experience_formateur" min="0" max="50" placeholder="0">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Avez-vous déjà enseigné avec ADIS ?</label>
