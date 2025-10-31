@@ -358,6 +358,7 @@
                                         <option>BAC</option>
                                         <option>LICENCE</option>
                                         <option>MASTER</option>
+                                        <option>Ingénieur</option>
                                         <option>DOCTORAT</option>
                                         <option>AUTRE</option>
                                     </select>
