@@ -42,24 +42,24 @@
                             </div>
                         </div>
                     </div>
-                    <form id="register-form" method="POST" action="{{ url('/register') }}" enctype="multipart/form-data">
+                    <form id="register-form" method="POST" action="{{ secure_url('/register') }}" enctype="multipart/form-data">
                         @csrf
                         <!-- ÉTAPE 1 : Informations générales -->
                         <div class="step" id="step-1">
                         <div class="row g-3 mb-3">
                                 <div class="col-md-6">
                                     <label for="prenom" class="form-label">Prénom(s)</label>
-                                    <input type="text" class="form-control" id="prenom" name="prenom" value="{{ old('prenom') }}" required>
+                                    <input type="text" class="form-control" id="prenom" name="prenom" value="{{ old('prenom') }}" autocomplete="given-name" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="nom" class="form-label">Nom</label>
-                                    <input type="text" class="form-control" id="nom" name="nom" value="{{ old('nom') }}" required>
+                                    <input type="text" class="form-control" id="nom" name="nom" value="{{ old('nom') }}" autocomplete="family-name" required>
                                 </div>
                             </div>
                             <div class="row g-3 mb-3">
                                 <div class="col-sm-6">
                                     <label for="sexe" class="form-label">Sexe</label>
-                                    <select class="form-select" id="sexe" name="sexe" required>
+                                    <select class="form-select" id="sexe" name="sexe" autocomplete="sex" required>
                                         <option value="">Choisir...</option>
                                         <option value="Homme" {{ old('sexe')==='Homme' ? 'selected' : '' }}>Homme</option>
                                         <option value="Femme" {{ old('sexe')==='Femme' ? 'selected' : '' }}>Femme</option>
@@ -67,37 +67,37 @@
                                 </div>
                                 <div class="col-sm-6">
                                     <label for="telephone" class="form-label">Téléphone (WhatsApp)</label>
-                                    <input type="text" class="form-control" id="telephone" name="telephone" value="{{ old('telephone') }}" required>
+                                    <input type="text" class="form-control" id="telephone" name="telephone" value="{{ old('telephone') }}" autocomplete="tel" required>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" required>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" autocomplete="email" required>
                                 <div class="form-text">Nous enverrons un lien de vérification à cette adresse.</div>
                             </div>
                             <div class="row g-3 mb-3">
                                 <div class="col-md-4">
                                     <label for="ville" class="form-label">Ville</label>
-                                    <input type="text" class="form-control" id="ville" name="ville" value="{{ old('ville') }}" required>
+                                    <input type="text" class="form-control" id="ville" name="ville" value="{{ old('ville') }}" autocomplete="address-level2" required>
                                 </div>
                                 <div class="col-md-4">
                                     <label for="commune" class="form-label">Commune</label>
-                                    <input type="text" class="form-control" id="commune" name="commune" value="{{ old('commune') }}" required>
+                                    <input type="text" class="form-control" id="commune" name="commune" value="{{ old('commune') }}" autocomplete="address-level3" required>
                                 </div>
                                 <div class="col-md-4">
                                     <label for="quartier" class="form-label">Quartier</label>
-                                    <input type="text" class="form-control" id="quartier" name="quartier" value="{{ old('quartier') }}" required>
+                                    <input type="text" class="form-control" id="quartier" name="quartier" value="{{ old('quartier') }}" autocomplete="address-line2" required>
                                 </div>
                             </div>
                             <div class="row g-3 mb-3">
                                 <div class="col-sm-6">
                                     <label for="password" class="form-label">Mot de passe</label>
-                                    <input type="password" class="form-control" id="password" name="password" required>
+                                    <input type="password" class="form-control" id="password" name="password" autocomplete="new-password" required>
                                     <div class="form-text">8+ caractères recommandés.</div>
                                 </div>
                                 <div class="col-sm-6">
                                     <label for="password_confirmation" class="form-label">Confirmation du mot de passe</label>
-                                    <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
+                                    <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" autocomplete="new-password" required>
                                 </div>
                             </div>
                             <div class="row g-3 mb-3">
