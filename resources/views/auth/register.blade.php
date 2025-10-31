@@ -93,7 +93,7 @@
                                 <div class="col-sm-6">
                                     <label for="password" class="form-label">Mot de passe</label>
                                     <input type="password" class="form-control" id="password" name="password" autocomplete="new-password" required>
-                                    <div class="form-text">8+ caractères recommandés.</div>
+                                    <div class="form-text">Plus de 8 caractères</div>
                                 </div>
                                 <div class="col-sm-6">
                                     <label for="password_confirmation" class="form-label">Confirmation du mot de passe</label>
