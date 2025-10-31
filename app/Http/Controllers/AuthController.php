@@ -77,12 +77,14 @@ class AuthController extends Controller
                 'categorie' => 'required|in:Enfant,Etudiant,Professionnel',
             ]);
             $extra = [
-                'connaissance_adis' => $request->connaissance_adis_formateur,
-                'formation_adis' => $request->formation_adis_formateur,
-                'formation_autre' => $request->formation_autre_formateur,
+                'disciplines' => $request->disciplines_formateur ?? [],
                 'niveau_coranique' => $request->niveau_coranique_formateur,
                 'niveau_arabe' => $request->niveau_arabe_formateur,
                 'niveau_francais' => $request->niveau_francais_formateur,
+                'experience_enseignement' => $request->experience_enseignement_formateur,
+                'annees_experience' => $request->annees_experience_formateur,
+                'deja_enseigne_adis' => $request->deja_enseigne_adis_formateur,
+                'enseignement_domicile' => $request->enseignement_domicile_formateur,
                 'diplome_religieux' => $request->diplome_religieux_formateur,
                 'diplome_general' => $request->diplome_general_formateur,
                 'categorie' => $request->categorie,

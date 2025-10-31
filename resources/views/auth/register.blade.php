@@ -278,55 +278,97 @@
                                 </div>
                             </div>
                             <div id="step2-formateur" class="d-none">
-                                <h5 class="mb-3">Informations complémentaires</h5>
+                                <h5 class="mb-3">Vos compétences et expérience pédagogique</h5>
                                 <div class="mb-3">
-                                    <label class="form-label">Comment avez-vous connu ADIS ?</label>
-                                    <select class="form-select" name="connaissance_adis_formateur">
-                                        <option value="">Choisir...</option>
-                                        <option>Réseaux sociaux</option>
-                                        <option>Publicité en ligne</option>
-                                        <option>Bouche à oreille</option>
-                                    </select>
+                                    <label class="form-label">Quelles disciplines pouvez-vous enseigner ?</label><br>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Langue arabe"> <label class="form-check-label">Langue arabe</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Tajwîd"> <label class="form-check-label">Le Tajwîd</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Tahfîz"> <label class="form-check-label">Le Tahfîz</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Tafsîr"> <label class="form-check-label">Le Tafsîr</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Hadith"> <label class="form-check-label">Le hadith</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="As-Sîra"> <label class="form-check-label">As-Sîra</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Fiqh"> <label class="form-check-label">Le Fiqh</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Anglais"> <label class="form-check-label">Anglais</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="disciplines_formateur[]" value="Tomes de Médine"> <label class="form-check-label">Tomes de Médine</label>
+                                    </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">Avez-vous déjà participé aux formations ADIS en langue arabe ?</label>
-                                    <select class="form-select" name="formation_adis_formateur">
-                                        <option value="">Choisir...</option>
-                                        <option>Oui</option>
-                                        <option>Non</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Avez-vous déjà participé à une formation en langue arabe avec un autre organisme ?</label>
-                                    <select class="form-select" name="formation_autre_formateur">
-                                        <option value="">Choisir...</option>
-                                        <option>Oui</option>
-                                        <option>Non</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Votre niveau de lecture coranique</label>
+                                    <label class="form-label">Quel est votre niveau de lecture coranique ?</label>
                                     <select class="form-select" name="niveau_coranique_formateur">
                                         <option value="">Choisir...</option>
+                                        <option>Excellent</option>
+                                        <option>Très bon</option>
+                                        <option>Bon</option>
                                         <option>Moyen</option>
-                                        <option>Avancé</option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">Votre niveau en langue arabe</label>
+                                    <label class="form-label">Quel est votre niveau en langue arabe ?</label>
                                     <select class="form-select" name="niveau_arabe_formateur">
                                         <option value="">Choisir...</option>
-                                        <option>Moyen</option>
+                                        <option>Natif</option>
+                                        <option>Courant</option>
                                         <option>Avancé</option>
+                                        <option>Intermédiaire</option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">Votre niveau en langue française</label>
+                                    <label class="form-label">Quel est votre niveau en langue française ?</label>
                                     <select class="form-select" name="niveau_francais_formateur">
                                         <option value="">Choisir...</option>
-                                        <option>Débutant</option>
-                                        <option>Moyen</option>
+                                        <option>Natif</option>
+                                        <option>Courant</option>
                                         <option>Avancé</option>
+                                        <option>Intermédiaire</option>
+                                        <option>Débutant</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Avez-vous une expérience en enseignement ?</label>
+                                    <select class="form-select" name="experience_enseignement_formateur">
+                                        <option value="">Choisir...</option>
+                                        <option>Oui, plusieurs années</option>
+                                        <option>Oui, quelques années</option>
+                                        <option>Oui, peu d'expérience</option>
+                                        <option>Non</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre d'années d'expérience en enseignement</label>
+                                    <input type="number" class="form-control" name="annees_experience_formateur" min="0" max="50" placeholder="0">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Avez-vous déjà enseigné avec ADIS ?</label>
+                                    <select class="form-select" name="deja_enseigne_adis_formateur">
+                                        <option value="">Choisir...</option>
+                                        <option>Oui</option>
+                                        <option>Non</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Souhaitez-vous enseigner à domicile ?</label>
+                                    <select class="form-select" name="enseignement_domicile_formateur">
+                                        <option value="">Choisir...</option>
+                                        <option>Oui</option>
+                                        <option>Non</option>
+                                        <option>Peut-être</option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
@@ -340,12 +382,12 @@
                                         <option>MASTER</option>
                                         <option>DOCTORAT</option>
                                         <option>AUTRE</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
+                                    </select>
+                                </div>
+                                <div class="mb-3">
                                     <label class="form-label">Dernier diplôme en sciences générales</label>
                                     <select class="form-select" name="diplome_general_formateur">
-                                <option value="">Choisir...</option>
+                                        <option value="">Choisir...</option>
                                         <option>CEPE</option>
                                         <option>BEPC</option>
                                         <option>BAC</option>
@@ -353,8 +395,8 @@
                                         <option>MASTER</option>
                                         <option>DOCTORAT</option>
                                         <option>AUTRE</option>
-                            </select>
-                        </div>
+                                    </select>
+                                </div>
                             </div>
                             <div class="d-flex justify-content-between mt-4">
                                 <button type="button" class="btn btn-outline-secondary" id="prev-2">Précédent</button>
