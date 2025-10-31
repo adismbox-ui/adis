@@ -76,14 +76,25 @@ class AuthController extends Controller
             $rules = array_merge($rules, [
                 'categorie' => 'required|in:Enfant,Etudiant,Professionnel',
             ]);
+            // Gérer les diplômes "AUTRE" : utiliser le champ texte si "AUTRE" est sélectionné
+            $diplomeReligieux = $request->diplome_religieux_formateur;
+            if ($diplomeReligieux === 'AUTRE' && $request->diplome_religieux_autre_formateur) {
+                $diplomeReligieux = $request->diplome_religieux_autre_formateur;
+            }
+            
+            $diplomeGeneral = $request->diplome_general_formateur;
+            if ($diplomeGeneral === 'AUTRE' && $request->diplome_general_autre_formateur) {
+                $diplomeGeneral = $request->diplome_general_autre_formateur;
+            }
+            
             $extra = [
                 'disciplines' => $request->disciplines_formateur ?? [],
                 'niveau_arabe' => $request->niveau_arabe_formateur,
                 'niveau_francais' => $request->niveau_francais_formateur,
                 'deja_enseigne_adis' => $request->deja_enseigne_adis_formateur,
                 'enseignement_domicile' => $request->enseignement_domicile_formateur,
-                'diplome_religieux' => $request->diplome_religieux_formateur,
-                'diplome_general' => $request->diplome_general_formateur,
+                'diplome_religieux' => $diplomeReligieux,
+                'diplome_general' => $diplomeGeneral,
                 'categorie' => $request->categorie,
             ];
             $categorie = $request->categorie;

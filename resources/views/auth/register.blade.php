@@ -334,7 +334,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Dernier diplôme en sciences religieuses</label>
-                                    <select class="form-select" name="diplome_religieux_formateur">
+                                    <select class="form-select" name="diplome_religieux_formateur" id="diplome_religieux_formateur">
                                         <option value="">Choisir...</option>
                                         <option>CEPE</option>
                                         <option>BEPC</option>
@@ -345,9 +345,13 @@
                                         <option>AUTRE</option>
                                     </select>
                                 </div>
+                                <div class="mb-3" id="diplome_religieux_autre_group" style="display: none;">
+                                    <label class="form-label">Précisez votre diplôme en sciences religieuses</label>
+                                    <input type="text" class="form-control" name="diplome_religieux_autre_formateur" placeholder="Entrez votre diplôme">
+                                </div>
                                 <div class="mb-3">
                                     <label class="form-label">Dernier diplôme en sciences générales</label>
-                                    <select class="form-select" name="diplome_general_formateur">
+                                    <select class="form-select" name="diplome_general_formateur" id="diplome_general_formateur">
                                         <option value="">Choisir...</option>
                                         <option>CEPE</option>
                                         <option>BEPC</option>
@@ -357,6 +361,10 @@
                                         <option>DOCTORAT</option>
                                         <option>AUTRE</option>
                                     </select>
+                                </div>
+                                <div class="mb-3" id="diplome_general_autre_group" style="display: none;">
+                                    <label class="form-label">Précisez votre diplôme en sciences générales</label>
+                                    <input type="text" class="form-control" name="diplome_general_autre_formateur" placeholder="Entrez votre diplôme">
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between mt-4">
@@ -529,5 +537,40 @@ updateCategorieOptions(); // Initialiser au chargement
     }
     document.getElementById('type_compte').addEventListener('change', toggleNiveauDropdown);
     document.addEventListener('DOMContentLoaded', toggleNiveauDropdown);
+
+    // Gestion des champs "AUTRE" pour les diplômes
+    function toggleDiplomeAutreField(selectId, groupId) {
+        const select = document.getElementById(selectId);
+        const group = document.getElementById(groupId);
+        if (select && group) {
+            group.style.display = select.value === 'AUTRE' ? 'block' : 'none';
+            if (select.value !== 'AUTRE') {
+                const input = group.querySelector('input');
+                if (input) input.value = '';
+            }
+        }
+    }
+
+    // Initialisation des écouteurs pour les diplômes
+    document.addEventListener('DOMContentLoaded', function() {
+        const diplomeReligieux = document.getElementById('diplome_religieux_formateur');
+        const diplomeGeneral = document.getElementById('diplome_general_formateur');
+        
+        if (diplomeReligieux) {
+            diplomeReligieux.addEventListener('change', function() {
+                toggleDiplomeAutreField('diplome_religieux_formateur', 'diplome_religieux_autre_group');
+            });
+            // Initialiser l'état au chargement
+            toggleDiplomeAutreField('diplome_religieux_formateur', 'diplome_religieux_autre_group');
+        }
+        
+        if (diplomeGeneral) {
+            diplomeGeneral.addEventListener('change', function() {
+                toggleDiplomeAutreField('diplome_general_formateur', 'diplome_general_autre_group');
+            });
+            // Initialiser l'état au chargement
+            toggleDiplomeAutreField('diplome_general_formateur', 'diplome_general_autre_group');
+        }
+    });
 </script>
 @endsection 
