@@ -206,7 +206,7 @@ class AuthController extends Controller
                     return redirect('/assistant/dashboard');
                 case 'formateur':
                     // Si formateur non validé par admin, bloquer
-                    if ($utilisateur->formateur && !$utilisateur->formateur->valide) {
+                    if ($utilisateur->formateur && isset($utilisateur->formateur->valide) && !$utilisateur->formateur->valide) {
                         \Auth::logout();
                         return back()->withErrors(['email' => "Votre compte formateur n'a pas encore été validé par l'administrateur."])->withInput();
                     }
