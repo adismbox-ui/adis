@@ -183,40 +183,64 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        // Nettoyer les données (trim pour éviter les espaces)
-        $email = trim($request->input('email', ''));
-        $password = $request->input('password', '');
-        
-        $credentials = [
-            'email' => $email,
-            'password' => $password,
-        ];
-        
-        // Validation
-        $request->validate([
+        // Validation d'abord
+        $validated = $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
+        // Nettoyer uniquement l'email (pas le mot de passe, car il peut contenir des espaces intentionnels)
+        $email = trim($validated['email']);
+        $password = $validated['password']; // Ne pas trimmer le mot de passe
+
         // Authentification manuelle car le mot de passe est dans 'mot_de_passe'
-        $utilisateur = \App\Models\Utilisateur::where('email', $credentials['email'])->first();
+        $utilisateur = \App\Models\Utilisateur::where('email', $email)->first();
         
         // Log pour débogage
         \Log::info('Web Login attempt', [
-            'email' => $credentials['email'],
+            'email' => $email,
+            'password_length' => strlen($password),
             'user_found' => $utilisateur ? true : false,
             'user_id' => $utilisateur?->id,
+            'user_type' => $utilisateur?->type_compte,
+            'user_active' => $utilisateur?->actif,
         ]);
         
-        if ($utilisateur && \Hash::check($credentials['password'], $utilisateur->mot_de_passe)) {
+        if (!$utilisateur) {
+            \Log::warning('Web Login: User not found', ['email' => $email]);
+            return back()->withErrors(['email' => 'Identifiants invalides'])->withInput();
+        }
+        
+        // Vérifier le mot de passe
+        $passwordCheck = \Hash::check($password, $utilisateur->mot_de_passe);
+        
+        \Log::info('Web Login: Password check', [
+            'user_id' => $utilisateur->id,
+            'password_check' => $passwordCheck,
+            'password_hash_starts_with' => substr($utilisateur->mot_de_passe, 0, 7),
+        ]);
+        
+        if ($passwordCheck) {
             if (!$utilisateur->actif) {
+                \Log::warning('Web Login: Account disabled', ['user_id' => $utilisateur->id]);
                 return back()->withErrors(['email' => 'Votre compte est désactivé.'])->withInput();
             }
-            // Bloquer les apprenants non vérifiés par email
+            
+            // Pour admin et assistant, pas de vérification d'email nécessaire
+            // Bloquer uniquement les apprenants non vérifiés par email
             if ($utilisateur->type_compte === 'apprenant' && empty($utilisateur->email_verified_at)) {
+                \Log::warning('Web Login: Apprenant email not verified', ['user_id' => $utilisateur->id]);
                 return back()->withErrors(['email' => 'Veuillez vérifier votre adresse email pour activer votre compte.'])->withInput();
             }
+            
+            // Connexion réussie
             \Auth::login($utilisateur);
+            
+            \Log::info('Web Login: Success', [
+                'user_id' => $utilisateur->id,
+                'type_compte' => $utilisateur->type_compte,
+            ]);
+            
             switch ($utilisateur->type_compte) {
                 case 'admin':
                     return redirect('/admin/dashboard');
@@ -226,6 +250,7 @@ class AuthController extends Controller
                     // Si formateur non validé par admin, bloquer
                     if ($utilisateur->formateur && isset($utilisateur->formateur->valide) && !$utilisateur->formateur->valide) {
                         \Auth::logout();
+                        \Log::warning('Web Login: Formateur not validated', ['user_id' => $utilisateur->id]);
                         return back()->withErrors(['email' => "Votre compte formateur n'a pas encore été validé par l'administrateur."])->withInput();
                     }
                     return redirect('/formateurs/dashboard');
@@ -235,6 +260,12 @@ class AuthController extends Controller
                     return redirect('/');
             }
         }
+        
+        // Mot de passe incorrect
+        \Log::warning('Web Login: Invalid password', [
+            'user_id' => $utilisateur->id,
+            'email' => $email,
+        ]);
         return back()->withErrors(['email' => 'Identifiants invalides'])->withInput();
     }
 
