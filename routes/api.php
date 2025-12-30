@@ -28,6 +28,20 @@ Route::post('/login', [ApiAuthController::class, 'login']);
 Route::post('/register', [ApiAuthController::class, 'register']);
 Route::get('/supports', [ApiModuleController::class, 'getSupports']);
 
+// Route de test pour vérifier que l'API fonctionne
+Route::get('/test', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'API ADIS fonctionne correctement',
+        'version' => '1.0',
+        'endpoints' => [
+            'login' => 'POST /api/login',
+            'register' => 'POST /api/register',
+            'supports' => 'GET /api/supports',
+        ],
+    ]);
+});
+
 // Routes protégées (nécessitent authentification)
 Route::middleware(['auth:sanctum'])->group(function () {
     
