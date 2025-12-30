@@ -46,4 +46,9 @@ class Formateur extends Model
     {
         return $this->hasMany(\App\Models\Niveau::class, 'formateur_id');
     }
+
+    public function assistant()
+    {
+        return $this->hasOne(\App\Models\Assistant::class, 'formateur_id');
+    }
 }
