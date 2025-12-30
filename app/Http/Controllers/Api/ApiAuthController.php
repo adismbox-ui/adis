@@ -17,20 +17,34 @@ class ApiAuthController extends Controller
      */
     public function login(Request $request)
     {
-        $credentials = $request->validate([
+        // Nettoyer les données reçues (trim pour éviter les espaces)
+        $email = trim($request->input('email', ''));
+        $password = $request->input('password', '');
+        
+        $credentials = [
+            'email' => $email,
+            'password' => $password,
+        ];
+        
+        // Validation
+        $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
         $utilisateur = Utilisateur::where('email', $credentials['email'])->first();
 
-        // Log pour débogage
+        // Log détaillé pour débogage
         \Log::info('API Login attempt', [
             'email' => $credentials['email'],
+            'password_length' => strlen($credentials['password']),
+            'password_first_chars' => substr($credentials['password'], 0, 3) . '...',
             'user_found' => $utilisateur ? true : false,
             'user_id' => $utilisateur?->id,
             'user_active' => $utilisateur?->actif,
             'user_type' => $utilisateur?->type_compte,
+            'has_password_hash' => $utilisateur ? !empty($utilisateur->mot_de_passe) : false,
+            'password_hash_length' => $utilisateur ? strlen($utilisateur->mot_de_passe) : 0,
         ]);
 
         if (!$utilisateur) {
@@ -41,8 +55,26 @@ class ApiAuthController extends Controller
             ], 401);
         }
 
-        if (!Hash::check($credentials['password'], $utilisateur->mot_de_passe)) {
-            \Log::warning('API Login: Invalid password', ['email' => $credentials['email'], 'user_id' => $utilisateur->id]);
+        // Test du mot de passe avec plusieurs variantes (au cas où il y aurait des espaces)
+        $passwordCheck = Hash::check($credentials['password'], $utilisateur->mot_de_passe);
+        $passwordCheckTrimmed = Hash::check(trim($credentials['password']), $utilisateur->mot_de_passe);
+        
+        if (!$passwordCheck && !$passwordCheckTrimmed) {
+            \Log::warning('API Login: Invalid password', [
+                'email' => $credentials['email'], 
+                'user_id' => $utilisateur->id,
+                'password_received_length' => strlen($credentials['password']),
+                'password_hash_starts_with' => substr($utilisateur->mot_de_passe, 0, 7),
+            ]);
+            
+            // Test supplémentaire : vérifier si le mot de passe en base est bien hashé
+            if (!str_starts_with($utilisateur->mot_de_passe, '$2y$') && !str_starts_with($utilisateur->mot_de_passe, '$2a$')) {
+                \Log::error('API Login: Password not properly hashed in database', [
+                    'user_id' => $utilisateur->id,
+                    'password_field' => substr($utilisateur->mot_de_passe, 0, 20),
+                ]);
+            }
+            
             return response()->json([
                 'success' => false,
                 'error' => 'Identifiants invalides'
