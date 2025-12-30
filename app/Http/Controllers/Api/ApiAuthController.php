@@ -17,22 +17,23 @@ class ApiAuthController extends Controller
      */
     public function login(Request $request)
     {
-        // Nettoyer les données reçues (trim pour éviter les espaces)
-        $email = trim($request->input('email', ''));
-        $password = $request->input('password', '');
-        
-        $credentials = [
-            'email' => $email,
-            'password' => $password,
-        ];
-        
-        // Validation
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
+        try {
+            // Nettoyer les données reçues (trim pour éviter les espaces)
+            $email = trim($request->input('email', ''));
+            $password = $request->input('password', '');
+            
+            $credentials = [
+                'email' => $email,
+                'password' => $password,
+            ];
+            
+            // Validation
+            $request->validate([
+                'email' => 'required|email',
+                'password' => 'required|string',
+            ]);
 
-        $utilisateur = Utilisateur::where('email', $credentials['email'])->first();
+            $utilisateur = Utilisateur::where('email', $credentials['email'])->first();
 
         // Log détaillé pour débogage
         \Log::info('API Login attempt', [
