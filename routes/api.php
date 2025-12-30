@@ -25,18 +25,19 @@ use App\Http\Controllers\Api\ApiDocumentController;
 
 // Route racine de l'API - Liste des endpoints disponibles
 Route::get('/', function () {
+    $baseUrl = request()->getSchemeAndHttpHost();
     return response()->json([
         'success' => true,
         'message' => 'API ADIS - Bienvenue',
         'version' => '1.0',
-        'base_url' => url('/api'),
+        'base_url' => $baseUrl . '/api',
         'endpoints' => [
-            'test' => 'GET /api/test',
-            'login' => 'POST /api/login',
-            'register' => 'POST /api/register',
-            'supports' => 'GET /api/supports',
+            'test' => 'GET ' . $baseUrl . '/api/test',
+            'login' => 'POST ' . $baseUrl . '/api/login',
+            'register' => 'POST ' . $baseUrl . '/api/register',
+            'supports' => 'GET ' . $baseUrl . '/api/supports',
         ],
-        'documentation' => 'Consultez /api/test pour plus d\'informations',
+        'documentation' => 'Consultez ' . $baseUrl . '/api/test pour plus d\'informations',
     ]);
 });
 
@@ -44,14 +45,16 @@ Route::get('/', function () {
 Route::post('/login', [ApiAuthController::class, 'login']);
 // Route GET pour /login - Message informatif
 Route::get('/login', function () {
+    $baseUrl = request()->getSchemeAndHttpHost();
     return response()->json([
         'success' => false,
         'error' => 'Méthode non autorisée',
         'message' => 'Cette route nécessite une requête POST, pas GET',
         'method' => 'POST',
-        'url' => url('/api/login'),
+        'url' => $baseUrl . '/api/login',
         'example' => [
             'method' => 'POST',
+            'url' => $baseUrl . '/api/login',
             'headers' => [
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json'
@@ -61,8 +64,10 @@ Route::get('/login', function () {
                 'password' => 'votre_mot_de_passe'
             ]
         ],
-        'test_url' => url('/api/test'),
-        'documentation' => 'Utilisez Postman, curl ou l\'application mobile pour faire une requête POST'
+        'curl_example' => "curl -X POST {$baseUrl}/api/login -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"email\":\"votre@email.com\",\"password\":\"votre_mot_de_passe\"}'",
+        'test_url' => $baseUrl . '/api/test',
+        'documentation' => 'Utilisez Postman, curl ou l\'application mobile pour faire une requête POST',
+        'note' => 'L\'application mobile utilise automatiquement POST, donc elle fonctionnera correctement'
     ], 405);
 });
 
