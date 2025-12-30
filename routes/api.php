@@ -42,6 +42,30 @@ Route::get('/', function () {
 
 // Routes publiques (sans authentification)
 Route::post('/login', [ApiAuthController::class, 'login']);
+// Route GET pour /login - Message informatif
+Route::get('/login', function () {
+    return response()->json([
+        'success' => false,
+        'error' => 'Méthode non autorisée',
+        'message' => 'Cette route nécessite une requête POST, pas GET',
+        'method' => 'POST',
+        'url' => url('/api/login'),
+        'example' => [
+            'method' => 'POST',
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
+            ],
+            'body' => [
+                'email' => 'votre@email.com',
+                'password' => 'votre_mot_de_passe'
+            ]
+        ],
+        'test_url' => url('/api/test'),
+        'documentation' => 'Utilisez Postman, curl ou l\'application mobile pour faire une requête POST'
+    ], 405);
+});
+
 Route::post('/register', [ApiAuthController::class, 'register']);
 Route::get('/supports', [ApiModuleController::class, 'getSupports']);
 
