@@ -24,7 +24,25 @@ class ApiAuthController extends Controller
 
         $utilisateur = Utilisateur::where('email', $credentials['email'])->first();
 
-        if (!$utilisateur || !Hash::check($credentials['password'], $utilisateur->mot_de_passe)) {
+        // Log pour débogage
+        \Log::info('API Login attempt', [
+            'email' => $credentials['email'],
+            'user_found' => $utilisateur ? true : false,
+            'user_id' => $utilisateur?->id,
+            'user_active' => $utilisateur?->actif,
+            'user_type' => $utilisateur?->type_compte,
+        ]);
+
+        if (!$utilisateur) {
+            \Log::warning('API Login: User not found', ['email' => $credentials['email']]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Identifiants invalides'
+            ], 401);
+        }
+
+        if (!Hash::check($credentials['password'], $utilisateur->mot_de_passe)) {
+            \Log::warning('API Login: Invalid password', ['email' => $credentials['email'], 'user_id' => $utilisateur->id]);
             return response()->json([
                 'success' => false,
                 'error' => 'Identifiants invalides'
@@ -46,11 +64,15 @@ class ApiAuthController extends Controller
         }
 
         // Vérifier si formateur est validé
-        if ($utilisateur->type_compte === 'formateur' && $utilisateur->formateur && !$utilisateur->formateur->valide) {
-            return response()->json([
-                'success' => false,
-                'error' => "Votre compte formateur n'a pas encore été validé par l'administrateur."
-            ], 403);
+        if ($utilisateur->type_compte === 'formateur') {
+            $formateur = $utilisateur->formateur;
+            if ($formateur && isset($formateur->valide) && !$formateur->valide) {
+                \Log::info('API Login: Formateur not validated', ['user_id' => $utilisateur->id]);
+                return response()->json([
+                    'success' => false,
+                    'error' => "Votre compte formateur n'a pas encore été validé par l'administrateur."
+                ], 403);
+            }
         }
 
         // Créer un token Sanctum
