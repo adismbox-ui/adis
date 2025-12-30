@@ -312,6 +312,16 @@
             transform: scale(1.01);
         }
 
+        .form-input.error-input {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .form-input.error-input:focus {
+            border-color: #ef4444;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.25);
+        }
+
         .input-icon {
             position: absolute;
             right: 20px;
@@ -577,18 +587,48 @@
 
             <form id="loginForm" method="POST" action="{{ route('login') }}">
                 @csrf
+                
+                <!-- Affichage des erreurs -->
+                @if ($errors->any())
+                    <div class="error-message" style="background: #ef4444; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 14px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                        <i class="fas fa-exclamation-circle" style="margin-right: 8px;"></i>
+                        @foreach ($errors->all() as $error)
+                            {{ $error }}
+                        @endforeach
+                    </div>
+                @endif
+
+                @if (session('success'))
+                    <div class="success-message" style="background: #10b981; color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 14px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                        <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+                        {{ session('success') }}
+                    </div>
+                @endif
+
                 <div class="form-group">
                     <div class="input-container">
-                        <input type="email" name="email" class="form-input" placeholder="Adresse email" required>
+                        <input type="email" name="email" class="form-input @error('email') error-input @enderror" 
+                               placeholder="Adresse email" value="{{ old('email') }}" required>
                         <i class="fas fa-envelope input-icon"></i>
                     </div>
+                    @error('email')
+                        <div class="error-text" style="color: #ef4444; font-size: 12px; margin-top: 5px; margin-left: 5px;">
+                            <i class="fas fa-exclamation-circle" style="margin-right: 4px;"></i>{{ $message }}
+                        </div>
+                    @enderror
                 </div>
 
                 <div class="form-group">
                     <div class="input-container">
-                        <input type="password" name="password" class="form-input" placeholder="Mot de passe" required>
+                        <input type="password" name="password" class="form-input @error('password') error-input @enderror" 
+                               placeholder="Mot de passe" required>
                         <i class="fas fa-lock input-icon"></i>
                     </div>
+                    @error('password')
+                        <div class="error-text" style="color: #ef4444; font-size: 12px; margin-top: 5px; margin-left: 5px;">
+                            <i class="fas fa-exclamation-circle" style="margin-right: 4px;"></i>{{ $message }}
+                        </div>
+                    @enderror
                 </div>
 
                 <div class="login-options">

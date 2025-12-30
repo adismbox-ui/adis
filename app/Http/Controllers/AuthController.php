@@ -183,13 +183,31 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
+        // Nettoyer les données (trim pour éviter les espaces)
+        $email = trim($request->input('email', ''));
+        $password = $request->input('password', '');
+        
+        $credentials = [
+            'email' => $email,
+            'password' => $password,
+        ];
+        
+        // Validation
+        $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
         // Authentification manuelle car le mot de passe est dans 'mot_de_passe'
         $utilisateur = \App\Models\Utilisateur::where('email', $credentials['email'])->first();
+        
+        // Log pour débogage
+        \Log::info('Web Login attempt', [
+            'email' => $credentials['email'],
+            'user_found' => $utilisateur ? true : false,
+            'user_id' => $utilisateur?->id,
+        ]);
+        
         if ($utilisateur && \Hash::check($credentials['password'], $utilisateur->mot_de_passe)) {
             if (!$utilisateur->actif) {
                 return back()->withErrors(['email' => 'Votre compte est désactivé.'])->withInput();
