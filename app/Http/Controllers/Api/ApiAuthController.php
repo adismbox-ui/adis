@@ -108,26 +108,83 @@ class ApiAuthController extends Controller
             }
         }
 
-        // Créer un token Sanctum
-        $token = $utilisateur->createToken('mobile-app')->plainTextToken;
+            // Créer un token Sanctum
+            try {
+                $token = $utilisateur->createToken('mobile-app')->plainTextToken;
+            } catch (\Exception $e) {
+                \Log::error('API Login: Token creation failed', [
+                    'user_id' => $utilisateur->id,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+                
+                // Vérifier si la table personal_access_tokens existe
+                try {
+                    \DB::table('personal_access_tokens')->limit(1)->get();
+                } catch (\Exception $dbError) {
+                    \Log::error('API Login: personal_access_tokens table missing', [
+                        'error' => $dbError->getMessage(),
+                    ]);
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Erreur de configuration serveur. Veuillez contacter l\'administrateur.',
+                        'details' => 'Table personal_access_tokens manquante. Exécutez: php artisan migrate'
+                    ], 500);
+                }
+                
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Erreur lors de la création du token. Veuillez réessayer.'
+                ], 500);
+            }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Connexion réussie',
-            'user' => [
-                'id' => $utilisateur->id,
-                'nom' => $utilisateur->nom,
-                'prenom' => $utilisateur->prenom,
-                'email' => $utilisateur->email,
+            \Log::info('API Login: Success', [
+                'user_id' => $utilisateur->id,
                 'type_compte' => $utilisateur->type_compte,
-                'sexe' => $utilisateur->sexe,
-                'telephone' => $utilisateur->telephone,
-            ],
-            'type_compte' => $utilisateur->type_compte,
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-            'expires_in' => null, // Sanctum tokens n'expirent pas par défaut
-        ], 200);
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Connexion réussie',
+                'user' => [
+                    'id' => $utilisateur->id,
+                    'nom' => $utilisateur->nom,
+                    'prenom' => $utilisateur->prenom,
+                    'email' => $utilisateur->email,
+                    'type_compte' => $utilisateur->type_compte,
+                    'sexe' => $utilisateur->sexe,
+                    'telephone' => $utilisateur->telephone,
+                ],
+                'type_compte' => $utilisateur->type_compte,
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'expires_in' => null, // Sanctum tokens n'expirent pas par défaut
+            ], 200);
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::warning('API Login: Validation error', [
+                'errors' => $e->errors(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Données invalides',
+                'errors' => $e->errors()
+            ], 422);
+            
+        } catch (\Exception $e) {
+            \Log::error('API Login: Unexpected error', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur serveur. Veuillez réessayer plus tard.',
+                'message' => config('app.debug') ? $e->getMessage() : 'Erreur interne du serveur'
+            ], 500);
+        }
     }
 
     /**
