@@ -23,6 +23,23 @@ use App\Http\Controllers\Api\ApiDocumentController;
 |
 */
 
+// Route racine de l'API - Liste des endpoints disponibles
+Route::get('/', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'API ADIS - Bienvenue',
+        'version' => '1.0',
+        'base_url' => url('/api'),
+        'endpoints' => [
+            'test' => 'GET /api/test',
+            'login' => 'POST /api/login',
+            'register' => 'POST /api/register',
+            'supports' => 'GET /api/supports',
+        ],
+        'documentation' => 'Consultez /api/test pour plus d\'informations',
+    ]);
+});
+
 // Routes publiques (sans authentification)
 Route::post('/login', [ApiAuthController::class, 'login']);
 Route::post('/register', [ApiAuthController::class, 'register']);
@@ -38,6 +55,7 @@ Route::get('/test', function () {
             'login' => 'POST /api/login',
             'register' => 'POST /api/register',
             'supports' => 'GET /api/supports',
+            'test' => 'GET /api/test',
         ],
     ]);
 });
