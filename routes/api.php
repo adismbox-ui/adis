@@ -194,6 +194,52 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [ApiAuthController::class, 'logout']);
     Route::get('/user', [ApiAuthController::class, 'user']);
     
+    // Route générique pour le profil (redirige vers la bonne route selon le type de compte)
+    Route::get('/profile', function (Request $request) {
+        $user = $request->user();
+        $typeCompte = $user->type_compte;
+        
+        // Rediriger vers la route appropriée selon le type de compte
+        switch ($typeCompte) {
+            case 'admin':
+                return app(ApiAdminController::class)->getProfile($request);
+            case 'apprenant':
+                return app(ApiApprenantController::class)->getProfile($request);
+            case 'formateur':
+                return app(ApiFormateurController::class)->getProfile($request);
+            case 'assistant':
+                return app(ApiAssistantController::class)->getProfile($request);
+            default:
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Type de compte non reconnu'
+                ], 400);
+        }
+    });
+    
+    // Route générique pour mettre à jour le profil
+    Route::put('/profile', function (Request $request) {
+        $user = $request->user();
+        $typeCompte = $user->type_compte;
+        
+        // Rediriger vers la route appropriée selon le type de compte
+        switch ($typeCompte) {
+            case 'admin':
+                return app(ApiAdminController::class)->updateProfile($request);
+            case 'apprenant':
+                return app(ApiApprenantController::class)->updateProfile($request);
+            case 'formateur':
+                return app(ApiFormateurController::class)->updateProfile($request);
+            case 'assistant':
+                return app(ApiAssistantController::class)->updateProfile($request);
+            default:
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Type de compte non reconnu'
+                ], 400);
+        }
+    });
+    
     // Routes Apprenant
     Route::prefix('apprenant')->group(function () {
         Route::get('/mes-formations', [ApiApprenantController::class, 'getMesFormations']);
