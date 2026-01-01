@@ -10,7 +10,10 @@ use App\Models\Formateur;
 use App\Models\Niveau;
 use App\Models\Module;
 use App\Models\Assistant;
+use App\Models\DemandeCoursMaison;
+use App\Models\Paiement;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class ApiAdminController extends Controller
 {
@@ -553,6 +556,190 @@ class ApiAdminController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Module supprimé avec succès',
+        ], 200);
+    }
+
+    /**
+     * Récupère les types d'utilisateurs disponibles
+     */
+    public function getUtilisateursTypes(Request $request)
+    {
+        $user = $request->user();
+        
+        if ($user->type_compte !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        $types = [
+            [
+                'value' => 'admin',
+                'label' => 'Admin',
+                'icon' => 'shield',
+            ],
+            [
+                'value' => 'apprenant',
+                'label' => 'Apprenant',
+                'icon' => 'person',
+            ],
+            [
+                'value' => 'formateur',
+                'label' => 'Formateur',
+                'icon' => 'graduation-cap',
+            ],
+            [
+                'value' => 'assistant',
+                'label' => 'Assistant',
+                'icon' => 'user-tie',
+            ],
+        ];
+
+        return response()->json([
+            'success' => true,
+            'types' => $types,
+        ], 200);
+    }
+
+    /**
+     * Récupère les demandes de cours à domicile par année
+     */
+    public function getDemandesCoursDomicileParAnnee(Request $request, $annee = null)
+    {
+        $user = $request->user();
+        
+        if ($user->type_compte !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        // Si aucune année n'est fournie, utiliser l'année actuelle
+        if (!$annee) {
+            $annee = date('Y');
+        }
+
+        // Récupérer les demandes pour l'année spécifiée
+        $demandes = DemandeCoursMaison::whereYear('created_at', $annee)
+            ->with(['user', 'niveau', 'formateur.utilisateur'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $demandesFormatees = $demandes->map(function ($demande) {
+            return [
+                'id' => $demande->id,
+                'user' => [
+                    'id' => $demande->user->id,
+                    'nom' => $demande->user->nom,
+                    'prenom' => $demande->user->prenom,
+                    'email' => $demande->user->email,
+                ],
+                'niveau' => $demande->niveau ? [
+                    'id' => $demande->niveau->id,
+                    'nom' => $demande->niveau->nom,
+                ] : null,
+                'module' => $demande->module,
+                'nombre_enfants' => $demande->nombre_enfants,
+                'ville' => $demande->ville,
+                'commune' => $demande->commune,
+                'quartier' => $demande->quartier,
+                'numero' => $demande->numero,
+                'statut' => $demande->statut,
+                'message' => $demande->message,
+                'formateur' => $demande->formateur && $demande->formateur->utilisateur ? [
+                    'id' => $demande->formateur->id,
+                    'nom' => $demande->formateur->utilisateur->nom,
+                    'prenom' => $demande->formateur->utilisateur->prenom,
+                ] : null,
+                'created_at' => $demande->created_at,
+                'updated_at' => $demande->updated_at,
+            ];
+        });
+
+        // Statistiques par statut
+        $stats = [
+            'total' => $demandes->count(),
+            'en_attente' => $demandes->where('statut', 'en_attente')->count(),
+            'validee' => $demandes->where('statut', 'validee')->count(),
+            'en_attente_formateur' => $demandes->where('statut', 'en_attente_formateur')->count(),
+            'refusee' => $demandes->where('statut', 'refusee')->count(),
+            'acceptee_formateur' => $demandes->where('statut', 'acceptee_formateur')->count(),
+            'refusee_formateur' => $demandes->where('statut', 'refusee_formateur')->count(),
+        ];
+
+        return response()->json([
+            'success' => true,
+            'annee' => $annee,
+            'statistiques' => $stats,
+            'demandes' => $demandesFormatees,
+        ], 200);
+    }
+
+    /**
+     * Récupère les demandes de paiement par statut
+     */
+    public function getDemandesPaiementParStatut(Request $request, $statut)
+    {
+        $user = $request->user();
+        
+        if ($user->type_compte !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        // Statuts valides (normaliser les statuts)
+        $statutsMapping = [
+            'en_attente' => 'en_attente',
+            'valide' => 'valide',
+            'validee' => 'valide',
+            'refuse' => 'refuse',
+            'refusee' => 'refuse',
+            'annule' => 'annule',
+            'annulee' => 'annule',
+        ];
+        
+        $statutNormalise = $statutsMapping[$statut] ?? $statut;
+        
+        // Récupérer les paiements avec le statut spécifié
+        $paiements = Paiement::where('statut', $statutNormalise)
+            ->with(['apprenant.utilisateur', 'module'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $paiementsFormates = $paiements->map(function ($paiement) {
+            return [
+                'id' => $paiement->id,
+                'montant' => $paiement->montant,
+                'statut' => $paiement->statut,
+                'methode_paiement' => $paiement->methode ?? null,
+                'date_paiement' => $paiement->date_paiement,
+                'reference' => $paiement->reference,
+                'notes' => $paiement->notes,
+                'apprenant' => $paiement->apprenant && $paiement->apprenant->utilisateur ? [
+                    'id' => $paiement->apprenant->utilisateur->id,
+                    'nom' => $paiement->apprenant->utilisateur->nom,
+                    'prenom' => $paiement->apprenant->utilisateur->prenom,
+                    'email' => $paiement->apprenant->utilisateur->email,
+                ] : null,
+                'module' => $paiement->module ? [
+                    'id' => $paiement->module->id,
+                    'titre' => $paiement->module->titre,
+                ] : null,
+                'created_at' => $paiement->created_at,
+                'updated_at' => $paiement->updated_at,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'statut' => $statut,
+            'statut_normalise' => $statutNormalise,
+            'total' => $paiements->count(),
+            'paiements' => $paiementsFormates,
         ], 200);
     }
 }

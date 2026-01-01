@@ -214,6 +214,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('admin')->group(function () {
         Route::get('/statistiques', [ApiAdminController::class, 'getStatistiques']);
         Route::get('/utilisateurs', [ApiAdminController::class, 'getUtilisateurs']);
+        Route::get('/utilisateurs/types', [ApiAdminController::class, 'getUtilisateursTypes']);
         Route::post('/utilisateurs', [ApiAdminController::class, 'addUser']);
         Route::get('/apprenants', [ApiAdminController::class, 'getApprenants']);
         Route::get('/formateurs', [ApiAdminController::class, 'getFormateurs']);
@@ -226,6 +227,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/modules', [ApiAdminController::class, 'createModule']);
         Route::put('/modules/{id}', [ApiAdminController::class, 'updateModule']);
         Route::delete('/modules/{id}', [ApiAdminController::class, 'deleteModule']);
+        // Routes pour les demandes de cours à domicile
+        Route::get('/demandes-cours-domicile/par-annee/{annee?}', [ApiAdminController::class, 'getDemandesCoursDomicileParAnnee']);
     });
     
     // Routes Formateur
@@ -271,6 +274,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('paiements')->group(function () {
         Route::post('/initialize', [ApiPaiementController::class, 'initialize']);
         Route::get('/status/{id}', [ApiPaiementController::class, 'getStatus']);
+    });
+    
+    // Routes demandes de paiement (admin)
+    Route::prefix('demandes-paiement')->group(function () {
+        Route::get('/admin/par-statut/{statut}', [ApiAdminController::class, 'getDemandesPaiementParStatut']);
     });
     
     // Webhook CinetPay
