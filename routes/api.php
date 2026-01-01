@@ -23,20 +23,32 @@ use App\Http\Controllers\Api\ApiDocumentController;
 |
 */
 
+/**
+ * Helper function to generate HTTPS URLs
+ * Force HTTPS even if APP_URL is HTTP
+ */
+if (!function_exists('https_url')) {
+    function https_url($path = null, $parameters = [], $secure = true) {
+        $url = url($path, $parameters, $secure);
+        // Force HTTPS by replacing http:// with https://
+        return str_replace('http://', 'https://', $url);
+    }
+}
+
 // Route racine de l'API - Liste des endpoints disponibles
 Route::get('/', function () {
     return response()->json([
         'success' => true,
         'message' => 'API ADIS - Bienvenue',
         'version' => '1.0',
-        'base_url' => url('/api'),
+        'base_url' => https_url('/api'),
         'endpoints' => [
-            'test' => 'GET ' . url('/api/test'),
-            'login' => 'POST ' . url('/api/login'),
-            'register' => 'POST ' . url('/api/register'),
-            'supports' => 'GET ' . url('/api/supports'),
+            'test' => 'GET ' . https_url('/api/test'),
+            'login' => 'POST ' . https_url('/api/login'),
+            'register' => 'POST ' . https_url('/api/register'),
+            'supports' => 'GET ' . https_url('/api/supports'),
         ],
-        'documentation' => 'Consultez ' . url('/api/test') . ' pour plus d\'informations',
+        'documentation' => 'Consultez ' . https_url('/api/test') . ' pour plus d\'informations',
     ]);
 });
 
@@ -49,10 +61,10 @@ Route::get('/login', function () {
         'error' => 'Méthode non autorisée',
         'message' => 'Cette route nécessite une requête POST, pas GET',
         'method' => 'POST',
-        'url' => url('/api/login'), // Utilise url() pour générer l'URL complète avec le schéma actuel
+        'url' => https_url('/api/login'), // Force HTTPS
         'example' => [
             'method' => 'POST',
-            'url' => url('/api/login'),
+            'url' => https_url('/api/login'),
             'headers' => [
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json'
@@ -62,8 +74,8 @@ Route::get('/login', function () {
                 'password' => 'votre_mot_de_passe'
             ]
         ],
-        'curl_example' => "curl -X POST " . url('/api/login') . " -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"email\":\"votre@email.com\",\"password\":\"votre_mot_de_passe\"}'",
-        'test_url' => url('/api/test'), // Utilise url()
+        'curl_example' => "curl -X POST " . https_url('/api/login') . " -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"email\":\"votre@email.com\",\"password\":\"votre_mot_de_passe\"}'",
+        'test_url' => https_url('/api/test'), // Force HTTPS
         'documentation' => 'Utilisez Postman, curl ou l\'application mobile pour faire une requête POST',
         'note' => 'L\'application mobile utilise automatiquement POST, donc elle fonctionnera correctement'
     ], 405);
@@ -77,10 +89,10 @@ Route::get('/register', function () {
         'error' => 'Méthode non autorisée',
         'message' => 'Cette route nécessite une requête POST, pas GET',
         'method' => 'POST',
-        'url' => url('/api/register'), // Utilise url() pour générer l'URL complète avec le schéma actuel
+        'url' => https_url('/api/register'), // Force HTTPS
         'example' => [
             'method' => 'POST',
-            'url' => url('/api/register'),
+            'url' => https_url('/api/register'),
             'headers' => [
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json'
@@ -96,8 +108,8 @@ Route::get('/register', function () {
                 'categorie' => 'Etudiant'
             ]
         ],
-        'curl_example' => "curl -X POST " . url('/api/register') . " -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"prenom\":\"John\",\"nom\":\"Doe\",\"email\":\"john@example.com\",\"password\":\"password123\",\"password_confirmation\":\"password123\",\"sexe\":\"Homme\",\"type_compte\":\"apprenant\",\"categorie\":\"Etudiant\"}'",
-        'test_url' => url('/api/test'), // Utilise url()
+        'curl_example' => "curl -X POST " . https_url('/api/register') . " -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"prenom\":\"John\",\"nom\":\"Doe\",\"email\":\"john@example.com\",\"password\":\"password123\",\"password_confirmation\":\"password123\",\"sexe\":\"Homme\",\"type_compte\":\"apprenant\",\"categorie\":\"Etudiant\"}'",
+        'test_url' => https_url('/api/test'), // Force HTTPS
         'documentation' => 'Utilisez Postman, curl ou l\'application mobile pour faire une requête POST',
         'note' => 'L\'application mobile utilise automatiquement POST, donc elle fonctionnera correctement'
     ], 405);
