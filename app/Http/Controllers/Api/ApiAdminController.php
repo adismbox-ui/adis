@@ -18,6 +18,75 @@ use Illuminate\Support\Facades\DB;
 class ApiAdminController extends Controller
 {
     /**
+     * Récupère le profil de l'admin
+     */
+    public function getProfile(Request $request)
+    {
+        $user = $request->user();
+        
+        if ($user->type_compte !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        return response()->json([
+            'success' => true,
+            'user' => [
+                'id' => $user->id,
+                'nom' => $user->nom,
+                'prenom' => $user->prenom,
+                'email' => $user->email,
+                'sexe' => $user->sexe,
+                'telephone' => $user->telephone,
+                'type_compte' => $user->type_compte,
+                'actif' => $user->actif,
+                'email_verified_at' => $user->email_verified_at,
+            ],
+        ], 200);
+    }
+
+    /**
+     * Met à jour le profil de l'admin
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+        
+        if ($user->type_compte !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        $data = $request->validate([
+            'prenom' => 'sometimes|string|max:255',
+            'nom' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:utilisateurs,email,' . $user->id,
+            'telephone' => 'nullable|string|max:20',
+            'sexe' => 'sometimes|in:Homme,Femme',
+        ]);
+
+        $user->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profil mis à jour avec succès',
+            'user' => [
+                'id' => $user->id,
+                'nom' => $user->nom,
+                'prenom' => $user->prenom,
+                'email' => $user->email,
+                'sexe' => $user->sexe,
+                'telephone' => $user->telephone,
+                'type_compte' => $user->type_compte,
+            ],
+        ], 200);
+    }
+
+    /**
      * Récupère les statistiques admin
      */
     public function getStatistiques(Request $request)

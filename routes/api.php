@@ -212,6 +212,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
     // Routes Admin
     Route::prefix('admin')->group(function () {
+        Route::get('/profile', [ApiAdminController::class, 'getProfile']);
+        Route::put('/profile', [ApiAdminController::class, 'updateProfile']);
         Route::get('/statistiques', [ApiAdminController::class, 'getStatistiques']);
         Route::get('/utilisateurs', [ApiAdminController::class, 'getUtilisateurs']);
         Route::get('/utilisateurs/types', [ApiAdminController::class, 'getUtilisateursTypes']);
