@@ -28,91 +28,147 @@ use App\Http\Controllers\Api\ApiDocumentController;
  * Force HTTPS even if APP_URL is HTTP
  */
 if (!function_exists('https_url')) {
-    function https_url($path = null, $parameters = [], $secure = true) {
-        $url = url($path, $parameters, $secure);
-        // Force HTTPS by replacing http:// with https://
-        return str_replace('http://', 'https://', $url);
+    function https_url($path = null) {
+        try {
+            // Get the current request
+            $request = request();
+            $host = $request->getHost();
+            $path = $path ? ltrim($path, '/') : '';
+            // Always use HTTPS
+            return 'https://' . $host . ($path ? '/' . $path : '');
+        } catch (\Exception $e) {
+            // Fallback: use config
+            $appUrl = config('app.url', 'https://www.adis-ci.net');
+            $appUrl = str_replace('http://', 'https://', $appUrl);
+            $path = $path ? ltrim($path, '/') : '';
+            return rtrim($appUrl, '/') . ($path ? '/' . $path : '');
+        }
     }
 }
 
 // Route racine de l'API - Liste des endpoints disponibles
 Route::get('/', function () {
-    return response()->json([
-        'success' => true,
-        'message' => 'API ADIS - Bienvenue',
-        'version' => '1.0',
-        'base_url' => https_url('/api'),
-        'endpoints' => [
-            'test' => 'GET ' . https_url('/api/test'),
-            'login' => 'POST ' . https_url('/api/login'),
-            'register' => 'POST ' . https_url('/api/register'),
-            'supports' => 'GET ' . https_url('/api/supports'),
-        ],
-        'documentation' => 'Consultez ' . https_url('/api/test') . ' pour plus d\'informations',
-    ]);
+    try {
+        $baseUrl = 'https://www.adis-ci.net';
+        return response()->json([
+            'success' => true,
+            'message' => 'API ADIS - Bienvenue',
+            'version' => '1.0',
+            'base_url' => $baseUrl . '/api',
+            'endpoints' => [
+                'test' => 'GET ' . $baseUrl . '/api/test',
+                'login' => 'POST ' . $baseUrl . '/api/login',
+                'register' => 'POST ' . $baseUrl . '/api/register',
+                'supports' => 'GET ' . $baseUrl . '/api/supports',
+            ],
+            'documentation' => 'Consultez ' . $baseUrl . '/api/test pour plus d\'informations',
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Error in GET /api/ route', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        return response()->json([
+            'success' => false,
+            'error' => 'Erreur serveur',
+            'message' => 'Une erreur est survenue'
+        ], 500);
+    }
 });
 
 // Routes publiques (sans authentification)
 Route::post('/login', [ApiAuthController::class, 'login']);
 // Route GET pour /login - Message informatif
 Route::get('/login', function () {
-    return response()->json([
-        'success' => false,
-        'error' => 'Méthode non autorisée',
-        'message' => 'Cette route nécessite une requête POST, pas GET',
-        'method' => 'POST',
-        'url' => https_url('/api/login'), // Force HTTPS
-        'example' => [
+    try {
+        $baseUrl = 'https://www.adis-ci.net';
+        $loginUrl = $baseUrl . '/api/login';
+        $testUrl = $baseUrl . '/api/test';
+        
+        return response()->json([
+            'success' => false,
+            'error' => 'Méthode non autorisée',
+            'message' => 'Cette route nécessite une requête POST, pas GET',
             'method' => 'POST',
-            'url' => https_url('/api/login'),
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json'
+            'url' => $loginUrl,
+            'example' => [
+                'method' => 'POST',
+                'url' => $loginUrl,
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json'
+                ],
+                'body' => [
+                    'email' => 'votre@email.com',
+                    'password' => 'votre_mot_de_passe'
+                ]
             ],
-            'body' => [
-                'email' => 'votre@email.com',
-                'password' => 'votre_mot_de_passe'
-            ]
-        ],
-        'curl_example' => "curl -X POST " . https_url('/api/login') . " -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"email\":\"votre@email.com\",\"password\":\"votre_mot_de_passe\"}'",
-        'test_url' => https_url('/api/test'), // Force HTTPS
-        'documentation' => 'Utilisez Postman, curl ou l\'application mobile pour faire une requête POST',
-        'note' => 'L\'application mobile utilise automatiquement POST, donc elle fonctionnera correctement'
-    ], 405);
+            'curl_example' => "curl -X POST {$loginUrl} -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"email\":\"votre@email.com\",\"password\":\"votre_mot_de_passe\"}'",
+            'test_url' => $testUrl,
+            'documentation' => 'Utilisez Postman, curl ou l\'application mobile pour faire une requête POST',
+            'note' => 'L\'application mobile utilise automatiquement POST, donc elle fonctionnera correctement'
+        ], 405);
+    } catch (\Exception $e) {
+        \Log::error('Error in GET /api/login route', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        return response()->json([
+            'success' => false,
+            'error' => 'Erreur serveur',
+            'message' => 'Une erreur est survenue lors de la génération de la réponse'
+        ], 500);
+    }
 });
 
 Route::post('/register', [ApiAuthController::class, 'register']);
 // Route GET pour /register - Message informatif
 Route::get('/register', function () {
-    return response()->json([
-        'success' => false,
-        'error' => 'Méthode non autorisée',
-        'message' => 'Cette route nécessite une requête POST, pas GET',
-        'method' => 'POST',
-        'url' => https_url('/api/register'), // Force HTTPS
-        'example' => [
+    try {
+        $baseUrl = 'https://www.adis-ci.net';
+        $registerUrl = $baseUrl . '/api/register';
+        $testUrl = $baseUrl . '/api/test';
+        
+        return response()->json([
+            'success' => false,
+            'error' => 'Méthode non autorisée',
+            'message' => 'Cette route nécessite une requête POST, pas GET',
             'method' => 'POST',
-            'url' => https_url('/api/register'),
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json'
+            'url' => $registerUrl,
+            'example' => [
+                'method' => 'POST',
+                'url' => $registerUrl,
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json'
+                ],
+                'body' => [
+                    'prenom' => 'John',
+                    'nom' => 'Doe',
+                    'email' => 'john@example.com',
+                    'password' => 'password123',
+                    'password_confirmation' => 'password123',
+                    'sexe' => 'Homme',
+                    'type_compte' => 'apprenant',
+                    'categorie' => 'Etudiant'
+                ]
             ],
-            'body' => [
-                'prenom' => 'John',
-                'nom' => 'Doe',
-                'email' => 'john@example.com',
-                'password' => 'password123',
-                'password_confirmation' => 'password123',
-                'sexe' => 'Homme',
-                'type_compte' => 'apprenant',
-                'categorie' => 'Etudiant'
-            ]
-        ],
-        'curl_example' => "curl -X POST " . https_url('/api/register') . " -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"prenom\":\"John\",\"nom\":\"Doe\",\"email\":\"john@example.com\",\"password\":\"password123\",\"password_confirmation\":\"password123\",\"sexe\":\"Homme\",\"type_compte\":\"apprenant\",\"categorie\":\"Etudiant\"}'",
-        'test_url' => https_url('/api/test'), // Force HTTPS
-        'documentation' => 'Utilisez Postman, curl ou l\'application mobile pour faire une requête POST',
-        'note' => 'L\'application mobile utilise automatiquement POST, donc elle fonctionnera correctement'
-    ], 405);
+            'curl_example' => "curl -X POST {$registerUrl} -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"prenom\":\"John\",\"nom\":\"Doe\",\"email\":\"john@example.com\",\"password\":\"password123\",\"password_confirmation\":\"password123\",\"sexe\":\"Homme\",\"type_compte\":\"apprenant\",\"categorie\":\"Etudiant\"}'",
+            'test_url' => $testUrl,
+            'documentation' => 'Utilisez Postman, curl ou l\'application mobile pour faire une requête POST',
+            'note' => 'L\'application mobile utilise automatiquement POST, donc elle fonctionnera correctement'
+        ], 405);
+    } catch (\Exception $e) {
+        \Log::error('Error in GET /api/register route', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        return response()->json([
+            'success' => false,
+            'error' => 'Erreur serveur',
+            'message' => 'Une erreur est survenue lors de la génération de la réponse'
+        ], 500);
+    }
 });
 Route::get('/supports', [ApiModuleController::class, 'getSupports']);
 
