@@ -25,19 +25,18 @@ use App\Http\Controllers\Api\ApiDocumentController;
 
 // Route racine de l'API - Liste des endpoints disponibles
 Route::get('/', function () {
-    $baseUrl = request()->getSchemeAndHttpHost();
     return response()->json([
         'success' => true,
         'message' => 'API ADIS - Bienvenue',
         'version' => '1.0',
-        'base_url' => $baseUrl . '/api',
+        'base_url' => url('/api'),
         'endpoints' => [
-            'test' => 'GET ' . $baseUrl . '/api/test',
-            'login' => 'POST ' . $baseUrl . '/api/login',
-            'register' => 'POST ' . $baseUrl . '/api/register',
-            'supports' => 'GET ' . $baseUrl . '/api/supports',
+            'test' => 'GET ' . url('/api/test'),
+            'login' => 'POST ' . url('/api/login'),
+            'register' => 'POST ' . url('/api/register'),
+            'supports' => 'GET ' . url('/api/supports'),
         ],
-        'documentation' => 'Consultez ' . $baseUrl . '/api/test pour plus d\'informations',
+        'documentation' => 'Consultez ' . url('/api/test') . ' pour plus d\'informations',
     ]);
 });
 
@@ -45,16 +44,15 @@ Route::get('/', function () {
 Route::post('/login', [ApiAuthController::class, 'login']);
 // Route GET pour /login - Message informatif
 Route::get('/login', function () {
-    $baseUrl = request()->getSchemeAndHttpHost();
     return response()->json([
         'success' => false,
         'error' => 'Méthode non autorisée',
         'message' => 'Cette route nécessite une requête POST, pas GET',
         'method' => 'POST',
-        'url' => $baseUrl . '/api/login',
+        'url' => url('/api/login'), // Utilise url() pour générer l'URL complète avec le schéma actuel
         'example' => [
             'method' => 'POST',
-            'url' => $baseUrl . '/api/login',
+            'url' => url('/api/login'),
             'headers' => [
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json'
@@ -64,14 +62,46 @@ Route::get('/login', function () {
                 'password' => 'votre_mot_de_passe'
             ]
         ],
-        'curl_example' => "curl -X POST {$baseUrl}/api/login -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"email\":\"votre@email.com\",\"password\":\"votre_mot_de_passe\"}'",
-        'test_url' => $baseUrl . '/api/test',
+        'curl_example' => "curl -X POST " . url('/api/login') . " -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"email\":\"votre@email.com\",\"password\":\"votre_mot_de_passe\"}'",
+        'test_url' => url('/api/test'), // Utilise url()
         'documentation' => 'Utilisez Postman, curl ou l\'application mobile pour faire une requête POST',
         'note' => 'L\'application mobile utilise automatiquement POST, donc elle fonctionnera correctement'
     ], 405);
 });
 
 Route::post('/register', [ApiAuthController::class, 'register']);
+// Route GET pour /register - Message informatif
+Route::get('/register', function () {
+    return response()->json([
+        'success' => false,
+        'error' => 'Méthode non autorisée',
+        'message' => 'Cette route nécessite une requête POST, pas GET',
+        'method' => 'POST',
+        'url' => url('/api/register'), // Utilise url() pour générer l'URL complète avec le schéma actuel
+        'example' => [
+            'method' => 'POST',
+            'url' => url('/api/register'),
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
+            ],
+            'body' => [
+                'prenom' => 'John',
+                'nom' => 'Doe',
+                'email' => 'john@example.com',
+                'password' => 'password123',
+                'password_confirmation' => 'password123',
+                'sexe' => 'Homme',
+                'type_compte' => 'apprenant',
+                'categorie' => 'Etudiant'
+            ]
+        ],
+        'curl_example' => "curl -X POST " . url('/api/register') . " -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"prenom\":\"John\",\"nom\":\"Doe\",\"email\":\"john@example.com\",\"password\":\"password123\",\"password_confirmation\":\"password123\",\"sexe\":\"Homme\",\"type_compte\":\"apprenant\",\"categorie\":\"Etudiant\"}'",
+        'test_url' => url('/api/test'), // Utilise url()
+        'documentation' => 'Utilisez Postman, curl ou l\'application mobile pour faire une requête POST',
+        'note' => 'L\'application mobile utilise automatiquement POST, donc elle fonctionnera correctement'
+    ], 405);
+});
 Route::get('/supports', [ApiModuleController::class, 'getSupports']);
 
 // Route de test pour vérifier que l'API fonctionne
