@@ -1543,6 +1543,11 @@ Préparez-vous à acquérir de nouvelles compétences et ainsi atteindre vos obj
 N'hésitez pas à nous contacter au besoin pour plus d'informations.
 
 </p>
+@if(session('app-download-info'))
+    <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 1rem; border-radius: 10px; margin: 1rem 0; text-align: center; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+        <i class="fas fa-info-circle"></i> {{ session('app-download-info') }}
+    </div>
+@endif
         <div class="adis-actions">
             <a href="/register" class="btn-inscription">
                 <i class="fas fa-user-plus"></i>
