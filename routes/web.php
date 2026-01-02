@@ -35,12 +35,13 @@ Route::get('/download-app', function () {
     if (file_exists($apkPath)) {
         return response()->download($apkPath, 'adis-mobile.apk', [
             'Content-Type' => 'application/vnd.android.package-archive',
+            'Content-Disposition' => 'attachment; filename="adis-mobile.apk"',
         ]);
     }
     
     // Sinon, rediriger vers Google Play Store ou afficher un message
     // Vous pouvez remplacer cette URL par le lien de votre app sur le Play Store
-    $playStoreUrl = 'https://play.google.com/store/apps/details?id=com.adis.mobile';
+    $playStoreUrl = 'https://play.google.com/store/apps/details?id=com.example.adis_mobile';
     
     // Détecter si c'est un appareil Android
     $userAgent = request()->userAgent();
