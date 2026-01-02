@@ -26,10 +26,33 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Routes pour le téléchargement de l'application mobile
-Route::get('/download-app', [App\Http\Controllers\MobileAppController::class, 'downloadPage'])->name('download-app.page');
-Route::get('/download-app/apk', [App\Http\Controllers\MobileAppController::class, 'download'])->name('mobile-app.download');
-Route::get('/download-app/store', [App\Http\Controllers\MobileAppController::class, 'redirectToStore'])->name('mobile-app.store');
+// Route pour télécharger l'application mobile
+Route::get('/download-app', function () {
+    // Chemin vers le fichier APK (à placer dans public/app/)
+    $apkPath = public_path('app/adis.apk');
+    
+    // Si le fichier APK existe, le télécharger
+    if (file_exists($apkPath)) {
+        return response()->download($apkPath, 'adis-mobile.apk', [
+            'Content-Type' => 'application/vnd.android.package-archive',
+        ]);
+    }
+    
+    // Sinon, rediriger vers Google Play Store ou afficher un message
+    // Vous pouvez remplacer cette URL par le lien de votre app sur le Play Store
+    $playStoreUrl = 'https://play.google.com/store/apps/details?id=com.adis.mobile';
+    
+    // Détecter si c'est un appareil Android
+    $userAgent = request()->userAgent();
+    $isAndroid = preg_match('/android/i', $userAgent);
+    
+    if ($isAndroid) {
+        return redirect($playStoreUrl);
+    }
+    
+    // Pour les autres appareils, afficher un message ou rediriger
+    return redirect('/')->with('app-download-info', 'L\'application mobile ADIS est disponible sur Google Play Store pour les appareils Android.');
+});
 
 Route::get('/apprenants/dashboard', [ApprenantController::class, 'dashboard'])->middleware('auth')->name('apprenants.dashboard');
 
