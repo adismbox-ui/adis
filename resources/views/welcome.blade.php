@@ -435,23 +435,6 @@
             background: linear-gradient(90deg, #fbbf24, var(--primary-green), var(--mint-green));
             color: #fff !important;
         }
-        .adis-actions a.btn-mobile {
-            background: linear-gradient(90deg, #667eea, #764ba2, var(--primary-green));
-            color: #fff !important;
-            animation: pulse-mobile 2s ease-in-out infinite;
-        }
-        @keyframes pulse-mobile {
-            0%, 100% {
-                box-shadow: 0 4px 18px rgba(102, 126, 234, 0.18), 0 1.5px 8px rgba(0,0,0,0.10);
-            }
-            50% {
-                box-shadow: 0 8px 28px rgba(102, 126, 234, 0.35), 0 3px 12px rgba(0,0,0,0.15);
-            }
-        }
-        .adis-actions a.btn-mobile:hover, .adis-actions a.btn-mobile:focus {
-            background: linear-gradient(90deg, #764ba2, #667eea, var(--mint-green));
-            animation: none;
-        }
         .adis-actions a:hover, .btn-voir-plus:hover, .btn-cta:hover, .btn-don-premium:hover, .adis-actions a:focus, .btn-voir-plus:focus, .btn-cta:focus, .btn-don-premium:focus {
             background: linear-gradient(100deg, var(--mint-green), var(--primary-green), var(--teal-green));
             color: #fff;
@@ -1491,6 +1474,95 @@
             50% { bottom: 52px; }
             100% { bottom: 32px; }
         }
+        /* Bouton flottant pour télécharger l'application mobile */
+        .app-mobile-float {
+            position: fixed;
+            left: 28px;
+            bottom: 120px;
+            z-index: 1999;
+            background: linear-gradient(135deg, #667eea, #764ba2, #4caf50);
+            color: #fff;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: appMobileFloat 8s ease-in-out infinite;
+            text-decoration: none;
+        }
+        .app-mobile-float:hover {
+            box-shadow: 0 16px 56px rgba(102, 126, 234, 0.6);
+            transform: scale(1.15) rotate(10deg);
+            background: linear-gradient(135deg, #764ba2, #667eea, #388e3c);
+        }
+        @keyframes appMobileFloat {
+            0% {
+                left: 28px;
+                bottom: 120px;
+                transform: translateY(0) rotate(0deg);
+            }
+            25% {
+                left: 50px;
+                bottom: 140px;
+                transform: translateY(-10px) rotate(5deg);
+            }
+            50% {
+                left: 28px;
+                bottom: 160px;
+                transform: translateY(-20px) rotate(0deg);
+            }
+            75% {
+                left: 50px;
+                bottom: 140px;
+                transform: translateY(-10px) rotate(-5deg);
+            }
+            100% {
+                left: 28px;
+                bottom: 120px;
+                transform: translateY(0) rotate(0deg);
+            }
+        }
+        @media (max-width: 768px) {
+            .app-mobile-float {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+                left: 20px;
+                bottom: 100px;
+            }
+            @keyframes appMobileFloat {
+                0% {
+                    left: 20px;
+                    bottom: 100px;
+                    transform: translateY(0) rotate(0deg);
+                }
+                25% {
+                    left: 40px;
+                    bottom: 120px;
+                    transform: translateY(-10px) rotate(5deg);
+                }
+                50% {
+                    left: 20px;
+                    bottom: 140px;
+                    transform: translateY(-20px) rotate(0deg);
+                }
+                75% {
+                    left: 40px;
+                    bottom: 120px;
+                    transform: translateY(-10px) rotate(-5deg);
+                }
+                100% {
+                    left: 20px;
+                    bottom: 100px;
+                    transform: translateY(0) rotate(0deg);
+                }
+            }
+        }
     </style>
     </head>
 
@@ -1557,10 +1629,6 @@ N'hésitez pas à nous contacter au besoin pour plus d'informations.
                 <i class="fas fa-sign-in-alt"></i>
                 Se connecter
             </a>
-            <a href="/download-app" class="btn-mobile" id="btn-download-app">
-                <i class="fas fa-mobile-alt"></i>
-                Télécharger l'app
-            </a>
             <a href="/projets/don" class="btn-don">
                 <i class="fas fa-donate"></i>
                 Faire un don
@@ -1625,6 +1693,10 @@ N'hésitez pas à nous contacter au besoin pour plus d'informations.
 
     <!-- Curseur personnalisé -->
     <div class="cursor"></div>
+    <!-- Bouton flottant pour télécharger l'application mobile -->
+    <a href="/download-app" class="app-mobile-float" title="Télécharger l'application mobile ADIS">
+        <i class="fas fa-mobile-alt"></i>
+    </a>
     <!-- WhatsApp flottant -->
     <a href="https://wa.me/message/URJVLNOBZL43D1" class="whatsapp-float" target="_blank" title="Contactez-nous sur WhatsApp">
         <i class="fab fa-whatsapp"></i>
