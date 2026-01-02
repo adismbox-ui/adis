@@ -435,6 +435,23 @@
             background: linear-gradient(90deg, #fbbf24, var(--primary-green), var(--mint-green));
             color: #fff !important;
         }
+        .adis-actions a.btn-mobile {
+            background: linear-gradient(90deg, var(--teal-green), var(--primary-green), var(--secondary-green));
+            color: #fff !important;
+            position: relative;
+        }
+        .adis-actions a.btn-mobile:hover, .adis-actions a.btn-mobile:focus {
+            background: linear-gradient(90deg, var(--secondary-green), var(--teal-green), var(--primary-green));
+            animation: pulse-mobile 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse-mobile {
+            0%, 100% {
+                box-shadow: 0 4px 18px rgba(76,175,80,0.18), 0 1.5px 8px rgba(0,0,0,0.10);
+            }
+            50% {
+                box-shadow: 0 8px 28px rgba(38,166,154,0.35), 0 3px 12px rgba(76,175,80,0.25);
+            }
+        }
         .adis-actions a:hover, .btn-voir-plus:hover, .btn-cta:hover, .btn-don-premium:hover, .adis-actions a:focus, .btn-voir-plus:focus, .btn-cta:focus, .btn-don-premium:focus {
             background: linear-gradient(100deg, var(--mint-green), var(--primary-green), var(--teal-green));
             color: #fff;
@@ -1538,6 +1555,10 @@ N'hésitez pas à nous contacter au besoin pour plus d'informations.
             <a href="/projets/don" class="btn-don">
                 <i class="fas fa-donate"></i>
                 Faire un don
+            </a>
+            <a href="/download-app" class="btn-mobile" id="btn-download-app" title="Télécharger l'application mobile ADIS">
+                <i class="fas fa-mobile-alt"></i>
+                Télécharger l'app
             </a>
         </div>
     </section>

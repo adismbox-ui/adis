@@ -26,6 +26,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Routes pour le téléchargement de l'application mobile
+Route::get('/download-app', [App\Http\Controllers\MobileAppController::class, 'downloadPage'])->name('download-app.page');
+Route::get('/download-app/apk', [App\Http\Controllers\MobileAppController::class, 'download'])->name('mobile-app.download');
+Route::get('/download-app/store', [App\Http\Controllers\MobileAppController::class, 'redirectToStore'])->name('mobile-app.store');
+
 Route::get('/apprenants/dashboard', [ApprenantController::class, 'dashboard'])->middleware('auth')->name('apprenants.dashboard');
 
 // Route admin : voir un formateur
