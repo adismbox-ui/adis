@@ -272,7 +272,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/apprenants/{apprenantId}/changer-niveau', [ApiAdminController::class, 'changerNiveauApprenant']);
         Route::get('/apprenants-payants', [ApiAdminController::class, 'getApprenantsPayants']);
         Route::get('/apprenants-non-payants', [ApiAdminController::class, 'getApprenantsNonPayants']);
+        Route::get('/assistants', [ApiAdminController::class, 'getAssistants']);
+        Route::post('/creer-formateur', [ApiAdminController::class, 'createFormateur']);
+        Route::delete('/formateurs/utilisateur/{utilisateurId}', [ApiAdminController::class, 'deleteFormateur']);
         Route::get('/formateurs-avec-profil-assistant', [ApiAdminController::class, 'formateursAvecProfilAssistant']);
+        // Routes pour les liens sociaux
+        Route::get('/liens-sociaux', [ApiAdminController::class, 'getLiensSociaux']);
+        Route::post('/liens-sociaux', [ApiAdminController::class, 'createLienSocial']);
+        Route::put('/liens-sociaux/{id}', [ApiAdminController::class, 'updateLienSocial']);
+        Route::delete('/liens-sociaux/{id}', [ApiAdminController::class, 'deleteLienSocial']);
         Route::post('/formateurs/{id}/devenir-assistant', [ApiAdminController::class, 'devenirAssistant']);
         Route::get('/modules', [ApiAdminController::class, 'getModules']);
         Route::post('/modules', [ApiAdminController::class, 'createModule']);
@@ -339,9 +347,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/admin/validees', function (Request $request) {
             return app(ApiAdminController::class)->getDemandesPaiementParStatut($request, 'validees');
         });
+        Route::get('/admin/acceptees', function (Request $request) {
+            return app(ApiAdminController::class)->getDemandesPaiementParStatut($request, 'validees');
+        });
     });
     
     // Webhook CinetPay
     Route::post('/payment-notify', [ApiPaiementController::class, 'handleNotification']);
 });
+
+// Route publique pour les liens sociaux (accessible aux apprenants sans authentification)
+Route::get('/admin/liens-sociaux/tous', [ApiAdminController::class, 'getAllLiensSociaux']);
 

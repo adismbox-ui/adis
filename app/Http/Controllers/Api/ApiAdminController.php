@@ -13,6 +13,7 @@ use App\Models\Assistant;
 use App\Models\DemandeCoursMaison;
 use App\Models\Paiement;
 use App\Models\Certificat;
+use App\Models\LienSocial;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 
@@ -990,6 +991,420 @@ class ApiAdminController extends Controller
             'success' => true,
             'apprenants_par_niveau' => array_values($apprenantsParNiveau),
             'total' => $apprenants->count(),
+        ], 200);
+    }
+
+    /**
+     * Récupère la liste des assistants
+     */
+    public function getAssistants(Request $request)
+    {
+        $user = $request->user();
+        
+        if ($user->type_compte !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        // Récupérer tous les assistants actifs
+        $assistantsFromTable = Assistant::with('utilisateur', 'formateur.utilisateur')
+            ->where('actif', true)
+            ->get()
+            ->map(function($assistant) {
+                return $assistant->utilisateur;
+            });
+            
+        // Ajouter aussi les utilisateurs avec type_compte = 'assistant'
+        $assistantsDirect = Utilisateur::where('type_compte', 'assistant')
+            ->whereNotIn('id', $assistantsFromTable->pluck('id'))
+            ->get();
+            
+        $assistants = $assistantsFromTable->merge($assistantsDirect)->sortByDesc('created_at');
+
+        $assistantsFormates = $assistants->map(function ($assistant) {
+            $assistantRecord = Assistant::where('utilisateur_id', $assistant->id)->first();
+            return [
+                'id' => $assistant->id,
+                'nom' => $assistant->nom,
+                'prenom' => $assistant->prenom,
+                'email' => $assistant->email,
+                'telephone' => $assistant->telephone,
+                'sexe' => $assistant->sexe,
+                'actif' => $assistant->actif ? 1 : 0,
+                'formateur_id' => $assistantRecord ? $assistantRecord->formateur_id : null,
+                'created_at' => $assistant->created_at,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'assistants' => [
+                'data' => $assistantsFormates->values(),
+            ],
+        ], 200);
+    }
+
+    /**
+     * Crée un nouveau formateur
+     */
+    public function createFormateur(Request $request)
+    {
+        $user = $request->user();
+        
+        if ($user->type_compte !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        try {
+            $data = $request->validate([
+                'nom' => 'required|string|max:255',
+                'prenom' => 'required|string|max:255',
+                'email' => 'required|email|unique:utilisateurs,email',
+                'telephone' => 'nullable|string|max:20',
+                'sexe' => 'required|in:Homme,Femme',
+                'password' => 'required|string|min:6',
+                'password_confirmation' => 'required|string|same:password',
+                'niveau_id' => 'nullable|exists:niveaux,id',
+                'ville' => 'nullable|string|max:255',
+                'commune' => 'nullable|string|max:255',
+                'quartier' => 'nullable|string|max:255',
+            ]);
+
+            // Créer l'utilisateur
+            $utilisateur = Utilisateur::create([
+                'nom' => $data['nom'],
+                'prenom' => $data['prenom'],
+                'email' => $data['email'],
+                'telephone' => $data['telephone'] ?? null,
+                'sexe' => $data['sexe'],
+                'password' => Hash::make($data['password']),
+                'type_compte' => 'formateur',
+                'actif' => true,
+                'email_verified_at' => now(),
+            ]);
+
+            // Créer le formateur
+            $formateur = Formateur::create([
+                'utilisateur_id' => $utilisateur->id,
+                'valide' => true,
+                'ville' => $data['ville'] ?? null,
+                'commune' => $data['commune'] ?? null,
+                'quartier' => $data['quartier'] ?? null,
+            ]);
+
+            // Assigner le niveau si fourni
+            if (isset($data['niveau_id'])) {
+                $niveau = Niveau::find($data['niveau_id']);
+                if ($niveau) {
+                    $niveau->formateur_id = $formateur->id;
+                    $niveau->save();
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Formateur créé avec succès',
+                'formateur' => [
+                    'id' => $formateur->id,
+                    'utilisateur' => [
+                        'id' => $utilisateur->id,
+                        'nom' => $utilisateur->nom,
+                        'prenom' => $utilisateur->prenom,
+                        'email' => $utilisateur->email,
+                    ],
+                ],
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur de validation',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la création du formateur', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la création du formateur: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Supprime un formateur
+     */
+    public function deleteFormateur(Request $request, $utilisateurId)
+    {
+        $user = $request->user();
+        
+        if ($user->type_compte !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        try {
+            $utilisateur = Utilisateur::findOrFail($utilisateurId);
+            
+            if ($utilisateur->type_compte !== 'formateur') {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Cet utilisateur n\'est pas un formateur'
+                ], 400);
+            }
+
+            // Supprimer le formateur associé
+            $formateur = Formateur::where('utilisateur_id', $utilisateurId)->first();
+            if ($formateur) {
+                $formateur->delete();
+            }
+
+            // Supprimer l'utilisateur
+            $utilisateur->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Formateur supprimé avec succès',
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la suppression du formateur', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la suppression du formateur: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Récupère la liste des liens sociaux
+     */
+    public function getLiensSociaux(Request $request)
+    {
+        $user = $request->user();
+        
+        if ($user->type_compte !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        $liens = LienSocial::where('actif', true)
+            ->orderBy('ordre')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $liensFormates = $liens->map(function ($lien) {
+            return [
+                'id' => $lien->id,
+                'plateforme' => $lien->plateforme,
+                'titre' => $lien->titre,
+                'description' => $lien->description,
+                'url' => $lien->url,
+                'actif' => $lien->actif,
+                'ordre' => $lien->ordre,
+                'created_at' => $lien->created_at,
+                'updated_at' => $lien->updated_at,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'liens' => $liensFormates,
+        ], 200);
+    }
+
+    /**
+     * Crée un nouveau lien social
+     */
+    public function createLienSocial(Request $request)
+    {
+        $user = $request->user();
+        
+        if ($user->type_compte !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        try {
+            $data = $request->validate([
+                'plateforme' => 'required|string|max:255',
+                'titre' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'url' => 'required|url|max:500',
+                'actif' => 'nullable|boolean',
+                'ordre' => 'nullable|integer|min:0',
+            ]);
+
+            $data['actif'] = $data['actif'] ?? true;
+            $data['ordre'] = $data['ordre'] ?? 0;
+
+            $lien = LienSocial::create($data);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Lien social créé avec succès',
+                'lien' => [
+                    'id' => $lien->id,
+                    'plateforme' => $lien->plateforme,
+                    'titre' => $lien->titre,
+                    'description' => $lien->description,
+                    'url' => $lien->url,
+                    'actif' => $lien->actif,
+                    'ordre' => $lien->ordre,
+                ],
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur de validation',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la création du lien social', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la création du lien social: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Met à jour un lien social
+     */
+    public function updateLienSocial(Request $request, $id)
+    {
+        $user = $request->user();
+        
+        if ($user->type_compte !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        try {
+            $lien = LienSocial::findOrFail($id);
+
+            $data = $request->validate([
+                'plateforme' => 'sometimes|string|max:255',
+                'titre' => 'sometimes|string|max:255',
+                'description' => 'nullable|string',
+                'url' => 'sometimes|url|max:500',
+                'actif' => 'nullable|boolean',
+                'ordre' => 'nullable|integer|min:0',
+            ]);
+
+            $lien->update($data);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Lien social mis à jour avec succès',
+                'lien' => [
+                    'id' => $lien->id,
+                    'plateforme' => $lien->plateforme,
+                    'titre' => $lien->titre,
+                    'description' => $lien->description,
+                    'url' => $lien->url,
+                    'actif' => $lien->actif,
+                    'ordre' => $lien->ordre,
+                ],
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Lien social non trouvé'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la mise à jour du lien social', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la mise à jour du lien social: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Supprime un lien social
+     */
+    public function deleteLienSocial(Request $request, $id)
+    {
+        $user = $request->user();
+        
+        if ($user->type_compte !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        try {
+            $lien = LienSocial::findOrFail($id);
+            $lien->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Lien social supprimé avec succès',
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Lien social non trouvé'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la suppression du lien social', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la suppression du lien social: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Récupère tous les liens sociaux (pour les apprenants)
+     */
+    public function getAllLiensSociaux(Request $request)
+    {
+        $liens = LienSocial::where('actif', true)
+            ->orderBy('ordre')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $liensFormates = $liens->map(function ($lien) {
+            return [
+                'id' => $lien->id,
+                'plateforme' => $lien->plateforme,
+                'titre' => $lien->titre,
+                'description' => $lien->description,
+                'url' => $lien->url,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'liens' => $liensFormates,
         ], 200);
     }
 }
