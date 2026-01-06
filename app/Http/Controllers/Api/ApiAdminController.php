@@ -1082,7 +1082,8 @@ class ApiAdminController extends Controller
                 'email' => $data['email'],
                 'telephone' => $data['telephone'] ?? null,
                 'sexe' => $data['sexe'],
-                'password' => Hash::make($data['password']),
+                'mot_de_passe' => Hash::make($data['password']),
+                'password' => Hash::make($data['password']), // Pour compatibilité
                 'type_compte' => 'formateur',
                 'actif' => true,
                 'email_verified_at' => now(),
