@@ -1408,5 +1408,64 @@ class ApiAdminController extends Controller
             'liens' => $liensFormates,
         ], 200);
     }
+
+    /**
+     * Active ou désactive un utilisateur (toggle)
+     */
+    public function toggleUtilisateur(Request $request, $utilisateurId)
+    {
+        $user = $request->user();
+        
+        if ($user->type_compte !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        try {
+            $utilisateur = Utilisateur::findOrFail($utilisateurId);
+            
+            // Ne pas permettre de désactiver soi-même
+            if ($utilisateur->id === $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Vous ne pouvez pas modifier votre propre statut'
+                ], 400);
+            }
+
+            // Toggle le statut actif
+            $utilisateur->actif = !$utilisateur->actif;
+            $utilisateur->save();
+
+            $statut = $utilisateur->actif ? 'activé' : 'désactivé';
+
+            return response()->json([
+                'success' => true,
+                'message' => "Utilisateur $statut avec succès",
+                'utilisateur' => [
+                    'id' => $utilisateur->id,
+                    'nom' => $utilisateur->nom,
+                    'prenom' => $utilisateur->prenom,
+                    'email' => $utilisateur->email,
+                    'actif' => $utilisateur->actif,
+                ],
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Utilisateur non trouvé'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors du toggle utilisateur', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la modification du statut: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
 
