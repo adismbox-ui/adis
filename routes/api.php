@@ -265,6 +265,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/demandes-cours-domicile/{demandeId}/refuser', [ApiFormateurController::class, 'refuserDemandeCoursDomicile']);
         Route::get('/progression-apprenants-assignes', [ApiFormateurController::class, 'getProgressionApprenantsAssignes']);
         Route::get('/progression-apprenants', [ApiFormateurController::class, 'getProgressionApprenants']);
+        Route::get('/apprenants-assignes', [ApiFormateurController::class, 'getApprenantsAssignes']);
     });
     
     // Routes Assistant

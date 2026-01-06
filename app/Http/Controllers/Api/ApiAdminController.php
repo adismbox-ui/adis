@@ -235,6 +235,83 @@ class ApiAdminController extends Controller
     }
 
     /**
+     * Crée un apprenant
+     */
+    public function createApprenant(Request $request)
+    {
+        $user = $request->user();
+        
+        if ($user->type_compte !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        try {
+            $data = $request->validate([
+                'nom' => 'required|string|max:255',
+                'prenom' => 'required|string|max:255',
+                'email' => 'required|email|unique:utilisateurs,email',
+                'password' => 'required|string|min:6',
+                'telephone' => 'nullable|string|max:20',
+                'sexe' => 'required|in:Homme,Femme',
+                'categorie' => 'nullable|string|max:255',
+                'niveau_id' => 'nullable|exists:niveaux,id',
+            ]);
+
+            // Créer l'utilisateur
+            $utilisateur = Utilisateur::create([
+                'nom' => $data['nom'],
+                'prenom' => $data['prenom'],
+                'email' => $data['email'],
+                'telephone' => $data['telephone'] ?? null,
+                'sexe' => $data['sexe'],
+                'mot_de_passe' => Hash::make($data['password']),
+                'password' => Hash::make($data['password']), // Pour compatibilité
+                'type_compte' => 'apprenant',
+                'actif' => true,
+                'email_verified_at' => now(),
+            ]);
+
+            // Créer le profil apprenant
+            $apprenant = Apprenant::create([
+                'utilisateur_id' => $utilisateur->id,
+                'niveau_id' => $data['niveau_id'] ?? null,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Apprenant créé avec succès',
+                'apprenant' => [
+                    'id' => $apprenant->id,
+                    'utilisateur' => [
+                        'id' => $utilisateur->id,
+                        'nom' => $utilisateur->nom,
+                        'prenom' => $utilisateur->prenom,
+                        'email' => $utilisateur->email,
+                    ],
+                ],
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur de validation',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la création de l\'apprenant', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la création de l\'apprenant: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Récupère la liste des formateurs
      */
     public function getFormateurs(Request $request)

@@ -292,6 +292,73 @@ class ApiFormateurController extends Controller
     }
 
     /**
+     * Récupère les apprenants assignés aux niveaux du formateur
+     */
+    public function getApprenantsAssignes(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $formateur = $user->formateur;
+
+            if (!$formateur) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Profil formateur non trouvé'
+                ], 404);
+            }
+
+            // Récupérer les niveaux assignés au formateur
+            $niveaux = Niveau::where('formateur_id', $formateur->id)
+                ->where('actif', true)
+                ->pluck('id');
+
+            if ($niveaux->isEmpty()) {
+                return response()->json([
+                    'success' => true,
+                    'apprenants' => [],
+                    'message' => 'Aucun niveau assigné à ce formateur'
+                ], 200);
+            }
+
+            // Récupérer les apprenants de ces niveaux
+            $apprenants = Apprenant::whereIn('niveau_id', $niveaux)
+                ->with(['utilisateur', 'niveau'])
+                ->get();
+
+            $apprenantsFormates = $apprenants->map(function ($apprenant) {
+                return [
+                    'id' => $apprenant->id,
+                    'utilisateur' => [
+                        'id' => $apprenant->utilisateur->id,
+                        'nom' => $apprenant->utilisateur->nom,
+                        'prenom' => $apprenant->utilisateur->prenom,
+                        'email' => $apprenant->utilisateur->email,
+                        'telephone' => $apprenant->utilisateur->telephone,
+                    ],
+                    'niveau' => $apprenant->niveau ? [
+                        'id' => $apprenant->niveau->id,
+                        'nom' => $apprenant->niveau->nom,
+                    ] : null,
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'apprenants' => $apprenantsFormates,
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la récupération des apprenants assignés', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la récupération des apprenants assignés: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Récupère les documents du formateur
      */
     public function getDocuments(Request $request)
