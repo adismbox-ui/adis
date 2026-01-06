@@ -12,6 +12,7 @@ use App\Models\Module;
 use App\Models\Assistant;
 use App\Models\DemandeCoursMaison;
 use App\Models\Paiement;
+use App\Models\Certificat;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 
