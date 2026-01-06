@@ -124,3 +124,10 @@ if ($passwordCheck && $utilisateur->actif) {
 
 echo "\n";
 
+
+
+
+
+
+
+

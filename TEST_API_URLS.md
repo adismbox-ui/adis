@@ -147,3 +147,10 @@ cd /var/www/html
 tail -f storage/logs/laravel.log | grep "API"
 ```
 
+
+
+
+
+
+
+

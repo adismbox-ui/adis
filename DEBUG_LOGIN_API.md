@@ -172,3 +172,10 @@ Une fois le problème résolu :
 2. Vérifiez que le token est bien sauvegardé
 3. Testez un endpoint protégé pour confirmer que l'authentification fonctionne
 
+
+
+
+
+
+
+

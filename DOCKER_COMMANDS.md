@@ -120,3 +120,10 @@ curl -X POST http://localhost/api/login \
   -d '{"email":"test@example.com","password":"test"}'
 ```
 
+
+
+
+
+
+
+

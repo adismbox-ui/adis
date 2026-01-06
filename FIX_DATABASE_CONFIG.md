@@ -90,3 +90,10 @@ php artisan key:generate
 # Puis éditez .env avec les bonnes valeurs
 ```
 
+
+
+
+
+
+
+

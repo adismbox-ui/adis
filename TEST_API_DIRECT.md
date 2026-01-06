@@ -65,3 +65,10 @@ Après ces tests, notez :
 3. Le nombre de tokens dans la table
 4. Les logs d'erreur complets
 
+
+
+
+
+
+
+

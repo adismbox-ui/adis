@@ -154,3 +154,10 @@ class ApiPaiementController extends Controller
     }
 }
 
+
+
+
+
+
+
+

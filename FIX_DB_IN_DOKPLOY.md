@@ -86,3 +86,10 @@ DB_PASSWORD=pw18jkayq10rlx3x
 
 Après correction, testez depuis l'application mobile. L'erreur 500 devrait disparaître.
 
+
+
+
+
+
+
+

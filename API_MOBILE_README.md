@@ -170,3 +170,10 @@ L'API est prête à être déployée sur Dokploy. Assurez-vous que:
 
 L'API est complète et prête à être utilisée par l'application mobile Flutter.
 
+
+
+
+
+
+
+

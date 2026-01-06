@@ -142,3 +142,10 @@ php artisan tinker
 
 Les modifications récentes ont amélioré la gestion des erreurs et les logs. Si le problème persiste, les logs vous indiqueront précisément ce qui bloque la connexion.
 
+
+
+
+
+
+
+

@@ -152,3 +152,10 @@ Dans la console Flutter, vous devriez voir :
 
 Une fois ces vérifications faites, la connexion devrait fonctionner ! 🎉
 
+
+
+
+
+
+
+

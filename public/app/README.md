@@ -19,3 +19,4 @@ public/
 
 Si votre application est publiée sur Google Play Store, modifiez la variable `$playStoreUrl` dans `routes/web.php` pour pointer vers votre application.
 
+

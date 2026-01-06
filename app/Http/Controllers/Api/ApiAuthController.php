@@ -192,66 +192,99 @@ class ApiAuthController extends Controller
      */
     public function register(Request $request)
     {
-        $rules = [
-            'prenom' => 'required|string|max:255',
-            'nom' => 'required|string|max:255',
-            'email' => 'required|email|unique:utilisateurs,email',
-            'password' => 'required|string|min:6|confirmed',
-            'sexe' => 'required|in:Homme,Femme',
-            'type_compte' => 'required|in:admin,assistant,formateur,apprenant',
-            'telephone' => 'nullable|string|max:20',
-        ];
+        try {
+            $rules = [
+                'prenom' => 'required|string|max:255',
+                'nom' => 'required|string|max:255',
+                'email' => 'required|email|unique:utilisateurs,email',
+                'password' => 'required|string|min:6|confirmed',
+                'sexe' => 'required|in:Homme,Femme',
+                'type_compte' => 'required|in:admin,assistant,formateur,apprenant',
+                'telephone' => 'nullable|string|max:20',
+            ];
 
-        if ($request->type_compte === 'apprenant' || $request->type_compte === 'formateur') {
-            $rules['categorie'] = 'required|in:Enfant,Etudiant,Professionnel';
-        }
+            if ($request->type_compte === 'apprenant' || $request->type_compte === 'formateur') {
+                $rules['categorie'] = 'required|in:Enfant,Etudiant,Professionnel';
+            }
 
-        $data = $request->validate($rules);
+            $data = $request->validate($rules);
 
-        // Générer un token de vérification pour apprenant
-        $verification_token = null;
-        if ($request->type_compte === 'apprenant') {
-            $verification_token = Str::random(48);
-        }
+            // Générer un token de vérification pour apprenant
+            $verification_token = null;
+            if ($request->type_compte === 'apprenant') {
+                $verification_token = Str::random(48);
+            }
 
-        $utilisateur = Utilisateur::create([
-            'prenom' => $data['prenom'],
-            'nom' => $data['nom'],
-            'email' => $data['email'],
-            'mot_de_passe' => Hash::make($data['password']),
-            'type_compte' => $data['type_compte'],
-            'sexe' => $data['sexe'],
-            'categorie' => $data['categorie'] ?? null,
-            'telephone' => $data['telephone'] ?? null,
-            'actif' => in_array($request->type_compte, ['apprenant', 'formateur'], true) ? false : true,
-            'email_verified_at' => ($request->type_compte === 'apprenant') ? null : now(),
-            'verification_token' => $verification_token,
-        ]);
-
-        // Créer le profil associé
-        if ($request->type_compte === 'formateur') {
-            \App\Models\Formateur::create([
-                'utilisateur_id' => $utilisateur->id,
-                'valide' => false,
+            $utilisateur = Utilisateur::create([
+                'prenom' => $data['prenom'],
+                'nom' => $data['nom'],
+                'email' => $data['email'],
+                'mot_de_passe' => Hash::make($data['password']),
+                'type_compte' => $data['type_compte'],
+                'sexe' => $data['sexe'],
+                'categorie' => $data['categorie'] ?? null,
+                'telephone' => $data['telephone'] ?? null,
+                'actif' => in_array($request->type_compte, ['apprenant', 'formateur'], true) ? false : true,
+                'email_verified_at' => ($request->type_compte === 'apprenant') ? null : now(),
+                'verification_token' => $verification_token,
             ]);
-        } elseif ($request->type_compte === 'apprenant') {
-            \App\Models\Apprenant::create([
-                'utilisateur_id' => $utilisateur->id,
-                'niveau_id' => $request->niveau_id ?? null
-            ]);
-        }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Inscription réussie',
-            'user' => [
-                'id' => $utilisateur->id,
-                'nom' => $utilisateur->nom,
-                'prenom' => $utilisateur->prenom,
-                'email' => $utilisateur->email,
-                'type_compte' => $utilisateur->type_compte,
-            ],
-        ], 201);
+            // Créer le profil associé
+            try {
+                if ($request->type_compte === 'formateur') {
+                    \App\Models\Formateur::create([
+                        'utilisateur_id' => $utilisateur->id,
+                        'valide' => false,
+                    ]);
+                } elseif ($request->type_compte === 'apprenant') {
+                    \App\Models\Apprenant::create([
+                        'utilisateur_id' => $utilisateur->id,
+                        'niveau_id' => $request->niveau_id ?? null
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('API Register: Error creating profile', [
+                    'user_id' => $utilisateur->id,
+                    'type_compte' => $request->type_compte,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+                // Continue anyway, the user is created
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Inscription réussie',
+                'user' => [
+                    'id' => $utilisateur->id,
+                    'nom' => $utilisateur->nom,
+                    'prenom' => $utilisateur->prenom,
+                    'email' => $utilisateur->email,
+                    'type_compte' => $utilisateur->type_compte,
+                ],
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::warning('API Register: Validation failed', [
+                'errors' => $e->errors(),
+                'request_data' => $request->all(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur de validation',
+                'details' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('API Register: Unexpected error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur serveur (500): ' . $e->getMessage(),
+                'details' => 'Un problème inattendu est survenu lors de l\'inscription. Veuillez réessayer ou contacter l\'administrateur.'
+            ], 500);
+        }
     }
 
     /**

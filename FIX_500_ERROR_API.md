@@ -113,3 +113,10 @@ Maintenant, au lieu d'une erreur 500 générique, vous recevrez :
 3. Vérifiez que Sanctum est correctement configuré
 4. Testez avec curl pour voir la réponse exacte
 
+
+
+
+
+
+
+

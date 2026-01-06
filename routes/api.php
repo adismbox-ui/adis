@@ -268,7 +268,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/formateurs', [ApiAdminController::class, 'getFormateurs']);
         Route::get('/niveaux', [ApiAdminController::class, 'getNiveaux']);
         Route::get('/niveaux/{niveauId}/apprenants', [ApiAdminController::class, 'getApprenantsByNiveau']);
+        Route::get('/niveaux/{niveauId}/apprenants-avec-certificats', [ApiAdminController::class, 'getApprenantsAvecCertificats']);
         Route::put('/apprenants/{apprenantId}/changer-niveau', [ApiAdminController::class, 'changerNiveauApprenant']);
+        Route::get('/apprenants-payants', [ApiAdminController::class, 'getApprenantsPayants']);
+        Route::get('/apprenants-non-payants', [ApiAdminController::class, 'getApprenantsNonPayants']);
         Route::get('/formateurs-avec-profil-assistant', [ApiAdminController::class, 'formateursAvecProfilAssistant']);
         Route::post('/formateurs/{id}/devenir-assistant', [ApiAdminController::class, 'devenirAssistant']);
         Route::get('/modules', [ApiAdminController::class, 'getModules']);
@@ -315,6 +318,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
     
     Route::prefix('documents')->group(function () {
+        Route::post('/', [ApiDocumentController::class, 'store']);
         Route::get('/{id}/download', [ApiDocumentController::class, 'download']);
     });
     
@@ -327,6 +331,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Routes demandes de paiement (admin)
     Route::prefix('demandes-paiement')->group(function () {
         Route::get('/admin/par-statut/{statut}', [ApiAdminController::class, 'getDemandesPaiementParStatut']);
+        // Routes spécifiques pour compatibilité avec l'application mobile
+        Route::get('/admin/refusees', [ApiAdminController::class, 'getDemandesPaiementParStatut']);
+        Route::get('/admin/en_attente', function (Request $request) {
+            return app(ApiAdminController::class)->getDemandesPaiementParStatut($request, 'en_attente');
+        });
+        Route::get('/admin/validees', function (Request $request) {
+            return app(ApiAdminController::class)->getDemandesPaiementParStatut($request, 'validees');
+        });
     });
     
     // Webhook CinetPay

@@ -115,3 +115,10 @@ echo "2. Entrez l'email et le mot de passe\n";
 echo "3. Vérifiez les logs: storage/logs/laravel.log\n";
 echo "\n";
 
+
+
+
+
+
+
+

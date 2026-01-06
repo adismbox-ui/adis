@@ -99,3 +99,10 @@ mysql -u mysql -ppw18jkayq10rlx3x -h adis-database-rjki7t -e "CREATE DATABASE IF
 php artisan migrate
 ```
 
+
+
+
+
+
+
+

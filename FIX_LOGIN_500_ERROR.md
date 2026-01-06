@@ -79,3 +79,10 @@ Après ces étapes, vérifiez que :
 - Dokploy devrait déployer automatiquement si configuré pour "On Push"
 - Si le déploiement automatique ne fonctionne pas, déclenchez un déploiement manuel dans Dokploy
 
+
+
+
+
+
+
+

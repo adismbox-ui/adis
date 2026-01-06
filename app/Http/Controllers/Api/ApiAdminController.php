@@ -749,7 +749,7 @@ class ApiAdminController extends Controller
     /**
      * Récupère les demandes de paiement par statut
      */
-    public function getDemandesPaiementParStatut(Request $request, $statut)
+    public function getDemandesPaiementParStatut(Request $request, $statut = null)
     {
         $user = $request->user();
         
@@ -760,13 +760,32 @@ class ApiAdminController extends Controller
             ], 403);
         }
 
+        // Si le statut n'est pas fourni, essayer de le récupérer depuis l'URL
+        if ($statut === null) {
+            $path = $request->path();
+            if (str_contains($path, 'refusees')) {
+                $statut = 'refusees';
+            } elseif (str_contains($path, 'en_attente')) {
+                $statut = 'en_attente';
+            } elseif (str_contains($path, 'validees')) {
+                $statut = 'validees';
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Statut non spécifié'
+                ], 400);
+            }
+        }
+
         // Statuts valides (normaliser les statuts)
         $statutsMapping = [
             'en_attente' => 'en_attente',
             'valide' => 'valide',
             'validee' => 'valide',
+            'validees' => 'valide',
             'refuse' => 'refuse',
             'refusee' => 'refuse',
+            'refusees' => 'refuse',
             'annule' => 'annule',
             'annulee' => 'annule',
         ];
@@ -809,6 +828,167 @@ class ApiAdminController extends Controller
             'statut_normalise' => $statutNormalise,
             'total' => $paiements->count(),
             'paiements' => $paiementsFormates,
+        ], 200);
+    }
+
+    /**
+     * Récupère les apprenants avec certificats pour un niveau donné
+     */
+    public function getApprenantsAvecCertificats(Request $request, $niveauId)
+    {
+        $user = $request->user();
+        
+        if ($user->type_compte !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        $apprenants = Apprenant::where('niveau_id', $niveauId)
+            ->whereHas('certificats')
+            ->with(['utilisateur', 'niveau', 'certificats'])
+            ->get();
+
+        $apprenantsFormates = $apprenants->map(function ($apprenant) {
+            return [
+                'id' => $apprenant->id,
+                'utilisateur' => [
+                    'id' => $apprenant->utilisateur->id,
+                    'nom' => $apprenant->utilisateur->nom,
+                    'prenom' => $apprenant->utilisateur->prenom,
+                    'email' => $apprenant->utilisateur->email,
+                ],
+                'niveau' => $apprenant->niveau ? [
+                    'id' => $apprenant->niveau->id,
+                    'nom' => $apprenant->niveau->nom,
+                ] : null,
+                'certificats' => $apprenant->certificats->map(function ($certificat) {
+                    return [
+                        'id' => $certificat->id,
+                        'titre' => $certificat->titre,
+                        'date_obtention' => $certificat->date_obtention,
+                        'fichier' => $certificat->fichier ? url('/storage/' . $certificat->fichier) : null,
+                    ];
+                }),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'niveau_id' => $niveauId,
+            'total' => $apprenants->count(),
+            'apprenants' => $apprenantsFormates,
+        ], 200);
+    }
+
+    /**
+     * Récupère les apprenants payants organisés par niveau
+     */
+    public function getApprenantsPayants(Request $request)
+    {
+        $user = $request->user();
+        
+        if ($user->type_compte !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        // Récupérer les apprenants qui ont au moins un paiement validé
+        $apprenants = Apprenant::whereHas('paiements', function($query) {
+                $query->where('statut', 'valide');
+            })
+            ->with(['utilisateur', 'niveau', 'paiements' => function($query) {
+                $query->where('statut', 'valide');
+            }])
+            ->get();
+
+        // Organiser par niveau
+        $apprenantsParNiveau = [];
+        foreach ($apprenants as $apprenant) {
+            $niveauId = $apprenant->niveau_id ?? 'sans_niveau';
+            $niveauNom = $apprenant->niveau ? $apprenant->niveau->nom : 'Sans niveau';
+            
+            if (!isset($apprenantsParNiveau[$niveauId])) {
+                $apprenantsParNiveau[$niveauId] = [
+                    'niveau_id' => $apprenant->niveau_id,
+                    'niveau_nom' => $niveauNom,
+                    'apprenants' => [],
+                ];
+            }
+            
+            $apprenantsParNiveau[$niveauId]['apprenants'][] = [
+                'id' => $apprenant->id,
+                'utilisateur' => [
+                    'id' => $apprenant->utilisateur->id,
+                    'nom' => $apprenant->utilisateur->nom,
+                    'prenom' => $apprenant->utilisateur->prenom,
+                    'email' => $apprenant->utilisateur->email,
+                ],
+                'paiements_valides' => $apprenant->paiements->count(),
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'apprenants_par_niveau' => array_values($apprenantsParNiveau),
+            'total' => $apprenants->count(),
+        ], 200);
+    }
+
+    /**
+     * Récupère les apprenants non payants organisés par niveau
+     */
+    public function getApprenantsNonPayants(Request $request)
+    {
+        $user = $request->user();
+        
+        if ($user->type_compte !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Accès non autorisé'
+            ], 403);
+        }
+
+        // Récupérer les apprenants qui n'ont pas de paiement validé
+        $apprenants = Apprenant::whereNotNull('niveau_id')
+            ->whereDoesntHave('paiements', function($query) {
+                $query->where('statut', 'valide');
+            })
+            ->with(['utilisateur', 'niveau'])
+            ->get();
+
+        // Organiser par niveau
+        $apprenantsParNiveau = [];
+        foreach ($apprenants as $apprenant) {
+            $niveauId = $apprenant->niveau_id ?? 'sans_niveau';
+            $niveauNom = $apprenant->niveau ? $apprenant->niveau->nom : 'Sans niveau';
+            
+            if (!isset($apprenantsParNiveau[$niveauId])) {
+                $apprenantsParNiveau[$niveauId] = [
+                    'niveau_id' => $apprenant->niveau_id,
+                    'niveau_nom' => $niveauNom,
+                    'apprenants' => [],
+                ];
+            }
+            
+            $apprenantsParNiveau[$niveauId]['apprenants'][] = [
+                'id' => $apprenant->id,
+                'utilisateur' => [
+                    'id' => $apprenant->utilisateur->id,
+                    'nom' => $apprenant->utilisateur->nom,
+                    'prenom' => $apprenant->utilisateur->prenom,
+                    'email' => $apprenant->utilisateur->email,
+                ],
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'apprenants_par_niveau' => array_values($apprenantsParNiveau),
+            'total' => $apprenants->count(),
         ], 200);
     }
 }

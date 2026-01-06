@@ -67,3 +67,10 @@ Après avoir exécuté ces commandes, notez :
 3. Le résultat du test curl
 4. La configuration Sanctum
 
+
+
+
+
+
+
+

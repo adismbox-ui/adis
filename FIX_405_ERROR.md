@@ -94,3 +94,10 @@ final response = await dio.post(
 
 L'erreur 405 est normale et attendue lorsque vous accédez à `/api/login` via un navigateur. L'API fonctionne correctement pour les requêtes POST depuis l'application mobile.
 
+
+
+
+
+
+
+

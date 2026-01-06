@@ -68,3 +68,10 @@ L'application mobile fait automatiquement des requêtes POST, donc elle fonction
 
 L'erreur 405 n'est **pas un bug**, c'est le comportement attendu pour protéger l'API.
 
+
+
+
+
+
+
+

@@ -75,3 +75,10 @@ Créez la base de données via Dokploy ou directement :
 php artisan migrate
 ```
 
+
+
+
+
+
+
+

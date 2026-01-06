@@ -114,3 +114,7 @@ Essayez de vous connecter depuis l'application mobile. L'erreur 500 devrait disp
 3. **Vérifier les permissions de la base de données** :
    - L'utilisateur MySQL doit avoir les permissions CREATE, INSERT, UPDATE, DELETE sur la base de données
 
+
+
+
+

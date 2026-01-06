@@ -236,3 +236,10 @@ curl -X POST https://adis-ci.net/api/login \
 4. Ajouter le refresh token si nécessaire
 5. Implémenter la déconnexion automatique en cas d'expiration
 
+
+
+
+
+
+
+
