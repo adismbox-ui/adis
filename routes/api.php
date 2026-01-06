@@ -252,6 +252,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/niveaux', [ApiFormateurController::class, 'getNiveaux']);
         Route::get('/profile', [ApiFormateurController::class, 'getProfile']);
         Route::put('/profile', [ApiFormateurController::class, 'updateProfile']);
+        Route::get('/mes-documents', [ApiFormateurController::class, 'getMesDocuments']);
+        Route::get('/vacances', [ApiFormateurController::class, 'getVacances']);
+        Route::post('/vacances', [ApiFormateurController::class, 'createVacance']);
+        Route::get('/vacances/{vacanceId}', [ApiFormateurController::class, 'getVacance']);
+        Route::put('/vacances/{vacanceId}', [ApiFormateurController::class, 'updateVacance']);
+        Route::delete('/vacances/{vacanceId}', [ApiFormateurController::class, 'deleteVacance']);
+        Route::get('/statistiques', [ApiFormateurController::class, 'getStatistiques']);
+        Route::get('/liens-google-meet', [ApiFormateurController::class, 'getLiensGoogleMeet']);
+        Route::get('/demandes-cours-domicile', [ApiFormateurController::class, 'getDemandesCoursDomicile']);
+        Route::post('/demandes-cours-domicile/{demandeId}/accepter', [ApiFormateurController::class, 'accepterDemandeCoursDomicile']);
+        Route::post('/demandes-cours-domicile/{demandeId}/refuser', [ApiFormateurController::class, 'refuserDemandeCoursDomicile']);
+        Route::get('/progression-apprenants-assignes', [ApiFormateurController::class, 'getProgressionApprenantsAssignes']);
+        Route::get('/progression-apprenants', [ApiFormateurController::class, 'getProgressionApprenants']);
     });
     
     // Routes Assistant

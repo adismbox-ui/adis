@@ -11,6 +11,10 @@ use App\Models\Document;
 use App\Models\Questionnaire;
 use App\Models\Apprenant;
 use App\Models\Inscription;
+use App\Models\Vacance;
+use App\Models\DemandeCoursMaison;
+use App\Models\ReponseQuestionnaire;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class ApiFormateurController extends Controller
@@ -446,6 +450,582 @@ class ApiFormateurController extends Controller
             'message' => 'Questionnaire créé avec succès',
             'questionnaire' => $questionnaire,
         ], 201);
+    }
+
+    /**
+     * Récupère les documents du formateur (alias pour mes-documents)
+     */
+    public function getMesDocuments(Request $request)
+    {
+        return $this->getDocuments($request);
+    }
+
+    /**
+     * Récupère les vacances
+     */
+    public function getVacances(Request $request)
+    {
+        try {
+            $vacances = Vacance::orderBy('date_debut', 'desc')->get();
+            
+            $vacancesFormates = $vacances->map(function ($vacance) {
+                return [
+                    'id' => $vacance->id,
+                    'nom' => $vacance->nom,
+                    'description' => $vacance->description,
+                    'date_debut' => $vacance->date_debut->format('Y-m-d'),
+                    'date_fin' => $vacance->date_fin->format('Y-m-d'),
+                    'actif' => $vacance->actif,
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'vacances' => $vacancesFormates,
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la récupération des vacances', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la récupération des vacances: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Crée une vacance
+     */
+    public function createVacance(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'nom' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'date_debut' => 'required|date',
+                'date_fin' => 'required|date|after_or_equal:date_debut',
+                'actif' => 'boolean',
+            ]);
+
+            $vacance = Vacance::create($data);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Vacance créée avec succès',
+                'vacance' => [
+                    'id' => $vacance->id,
+                    'nom' => $vacance->nom,
+                    'description' => $vacance->description,
+                    'date_debut' => $vacance->date_debut->format('Y-m-d'),
+                    'date_fin' => $vacance->date_fin->format('Y-m-d'),
+                    'actif' => $vacance->actif,
+                ],
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur de validation',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la création de la vacance', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la création de la vacance: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Récupère une vacance spécifique
+     */
+    public function getVacance(Request $request, $vacanceId)
+    {
+        try {
+            $vacance = Vacance::findOrFail($vacanceId);
+
+            return response()->json([
+                'success' => true,
+                'vacance' => [
+                    'id' => $vacance->id,
+                    'nom' => $vacance->nom,
+                    'description' => $vacance->description,
+                    'date_debut' => $vacance->date_debut->format('Y-m-d'),
+                    'date_fin' => $vacance->date_fin->format('Y-m-d'),
+                    'actif' => $vacance->actif,
+                ],
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Vacance non trouvée'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la récupération de la vacance', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la récupération de la vacance: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Met à jour une vacance
+     */
+    public function updateVacance(Request $request, $vacanceId)
+    {
+        try {
+            $vacance = Vacance::findOrFail($vacanceId);
+
+            $data = $request->validate([
+                'nom' => 'sometimes|string|max:255',
+                'description' => 'nullable|string',
+                'date_debut' => 'sometimes|date',
+                'date_fin' => 'sometimes|date|after_or_equal:date_debut',
+                'actif' => 'boolean',
+            ]);
+
+            $vacance->update($data);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Vacance mise à jour avec succès',
+                'vacance' => [
+                    'id' => $vacance->id,
+                    'nom' => $vacance->nom,
+                    'description' => $vacance->description,
+                    'date_debut' => $vacance->date_debut->format('Y-m-d'),
+                    'date_fin' => $vacance->date_fin->format('Y-m-d'),
+                    'actif' => $vacance->actif,
+                ],
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Vacance non trouvée'
+            ], 404);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur de validation',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la mise à jour de la vacance', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la mise à jour de la vacance: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Supprime une vacance
+     */
+    public function deleteVacance(Request $request, $vacanceId)
+    {
+        try {
+            $vacance = Vacance::findOrFail($vacanceId);
+            $vacance->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Vacance supprimée avec succès',
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Vacance non trouvée'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la suppression de la vacance', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la suppression de la vacance: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Récupère les statistiques du formateur
+     */
+    public function getStatistiques(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $formateur = $user->formateur;
+
+            if (!$formateur) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Profil formateur non trouvé'
+                ], 404);
+            }
+
+            $moduleIds = Module::where('formateur_id', $formateur->id)->pluck('id');
+            
+            $stats = [
+                'total_modules' => Module::where('formateur_id', $formateur->id)->count(),
+                'total_apprenants' => Inscription::whereIn('module_id', $moduleIds)
+                    ->where('statut', 'valide')
+                    ->distinct('apprenant_id')
+                    ->count('apprenant_id'),
+                'total_questionnaires' => Questionnaire::whereIn('module_id', $moduleIds)->count(),
+                'total_documents' => Document::where('formateur_id', $formateur->id)->count(),
+            ];
+
+            return response()->json([
+                'success' => true,
+                'statistiques' => $stats,
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la récupération des statistiques formateur', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la récupération des statistiques: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Récupère les liens Google Meet des niveaux du formateur
+     */
+    public function getLiensGoogleMeet(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $formateur = $user->formateur;
+
+            if (!$formateur) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Profil formateur non trouvé'
+                ], 404);
+            }
+
+            $niveaux = Niveau::where('formateur_id', $formateur->id)
+                ->where('actif', true)
+                ->whereNotNull('lien_meet')
+                ->orderBy('ordre')
+                ->get();
+
+            $liens = $niveaux->map(function ($niveau) {
+                return [
+                    'id' => $niveau->id,
+                    'nom' => $niveau->nom,
+                    'lien_meet' => $niveau->lien_meet,
+                    'description' => $niveau->description,
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'liens' => $liens,
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la récupération des liens Google Meet', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la récupération des liens Google Meet: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Récupère les demandes de cours à domicile
+     */
+    public function getDemandesCoursDomicile(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $formateur = $user->formateur;
+
+            if (!$formateur) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Profil formateur non trouvé'
+                ], 404);
+            }
+
+            // Récupérer les demandes assignées au formateur ou en attente
+            $demandes = DemandeCoursMaison::where('formateur_id', $formateur->id)
+                ->orWhere(function($query) {
+                    $query->whereNull('formateur_id')
+                          ->where('statut', 'en_attente');
+                })
+                ->with(['user', 'niveau', 'module'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            $demandesFormates = $demandes->map(function ($demande) {
+                return [
+                    'id' => $demande->id,
+                    'user' => $demande->user ? [
+                        'id' => $demande->user->id,
+                        'nom' => $demande->user->nom,
+                        'prenom' => $demande->user->prenom,
+                        'email' => $demande->user->email,
+                        'telephone' => $demande->user->telephone,
+                    ] : null,
+                    'niveau' => $demande->niveau ? [
+                        'id' => $demande->niveau->id,
+                        'nom' => $demande->niveau->nom,
+                    ] : null,
+                    'module' => $demande->module ? [
+                        'id' => $demande->module->id,
+                        'titre' => $demande->module->titre,
+                    ] : $demande->module, // Si c'est une string
+                    'nombre_enfants' => $demande->nombre_enfants,
+                    'ville' => $demande->ville,
+                    'commune' => $demande->commune,
+                    'quartier' => $demande->quartier,
+                    'numero' => $demande->numero,
+                    'message' => $demande->message,
+                    'statut' => $demande->statut,
+                    'created_at' => $demande->created_at->format('Y-m-d H:i:s'),
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'demandes' => $demandesFormates,
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la récupération des demandes de cours à domicile', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la récupération des demandes: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Accepte une demande de cours à domicile
+     */
+    public function accepterDemandeCoursDomicile(Request $request, $demandeId)
+    {
+        try {
+            $user = $request->user();
+            $formateur = $user->formateur;
+
+            if (!$formateur) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Profil formateur non trouvé'
+                ], 404);
+            }
+
+            $demande = DemandeCoursMaison::findOrFail($demandeId);
+            
+            // Vérifier que la demande peut être acceptée
+            if ($demande->statut !== 'en_attente') {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Cette demande ne peut plus être acceptée'
+                ], 400);
+            }
+
+            $demande->formateur_id = $formateur->id;
+            $demande->statut = 'acceptee';
+            $demande->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Demande acceptée avec succès',
+                'demande' => [
+                    'id' => $demande->id,
+                    'statut' => $demande->statut,
+                ],
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Demande non trouvée'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de l\'acceptation de la demande', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de l\'acceptation de la demande: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Refuse une demande de cours à domicile
+     */
+    public function refuserDemandeCoursDomicile(Request $request, $demandeId)
+    {
+        try {
+            $user = $request->user();
+            $formateur = $user->formateur;
+
+            if (!$formateur) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Profil formateur non trouvé'
+                ], 404);
+            }
+
+            $demande = DemandeCoursMaison::findOrFail($demandeId);
+            
+            // Vérifier que la demande peut être refusée
+            if ($demande->statut !== 'en_attente' && $demande->statut !== 'acceptee') {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Cette demande ne peut plus être refusée'
+                ], 400);
+            }
+
+            $data = $request->validate([
+                'motif_refus' => 'nullable|string|max:500',
+            ]);
+
+            $demande->statut = 'refusee';
+            if (isset($data['motif_refus'])) {
+                $demande->motif_refus = $data['motif_refus'];
+            }
+            $demande->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Demande refusée avec succès',
+                'demande' => [
+                    'id' => $demande->id,
+                    'statut' => $demande->statut,
+                    'motif_refus' => $demande->motif_refus,
+                ],
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Demande non trouvée'
+            ], 404);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur de validation',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors du refus de la demande', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors du refus de la demande: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Récupère la progression des apprenants assignés
+     */
+    public function getProgressionApprenantsAssignes(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $formateur = $user->formateur;
+
+            if (!$formateur) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Profil formateur non trouvé'
+                ], 404);
+            }
+
+            // Récupérer les modules du formateur
+            $moduleIds = Module::where('formateur_id', $formateur->id)->pluck('id');
+            
+            // Récupérer les apprenants inscrits à ces modules
+            $inscriptions = Inscription::whereIn('module_id', $moduleIds)
+                ->where('statut', 'valide')
+                ->with(['apprenant.utilisateur', 'apprenant.niveau', 'module'])
+                ->get();
+
+            $progression = [];
+            
+            foreach ($inscriptions as $inscription) {
+                $apprenantId = $inscription->apprenant_id;
+                
+                if (!isset($progression[$apprenantId])) {
+                    $questionnairesCompletes = ReponseQuestionnaire::where('apprenant_id', $apprenantId)
+                        ->distinct('questionnaire_id')
+                        ->count('questionnaire_id');
+                    
+                    $progression[$apprenantId] = [
+                        'apprenant' => [
+                            'id' => $inscription->apprenant->id,
+                            'nom' => $inscription->apprenant->utilisateur->nom,
+                            'prenom' => $inscription->apprenant->utilisateur->prenom,
+                            'email' => $inscription->apprenant->utilisateur->email,
+                        ],
+                        'niveau' => $inscription->apprenant->niveau ? [
+                            'id' => $inscription->apprenant->niveau->id,
+                            'nom' => $inscription->apprenant->niveau->nom,
+                        ] : null,
+                        'modules_inscrits' => 0,
+                        'questionnaires_completes' => $questionnairesCompletes,
+                        'modules' => [],
+                    ];
+                }
+                
+                $progression[$apprenantId]['modules_inscrits']++;
+                $progression[$apprenantId]['modules'][] = [
+                    'id' => $inscription->module->id,
+                    'titre' => $inscription->module->titre,
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'progression' => array_values($progression),
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la récupération de la progression', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la récupération de la progression: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Récupère la progression des apprenants (alias)
+     */
+    public function getProgressionApprenants(Request $request)
+    {
+        return $this->getProgressionApprenantsAssignes($request);
     }
 }
 
