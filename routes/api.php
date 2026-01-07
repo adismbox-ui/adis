@@ -243,6 +243,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/profile', [ApiApprenantController::class, 'updateProfile']);
         Route::get('/progression', [ApiApprenantController::class, 'getProgression']);
         Route::get('/paiements', [ApiApprenantController::class, 'getPaiements']);
+        Route::get('/modules-payes', [ApiApprenantController::class, 'getModulesPayes']);
+        Route::get('/liens-google-meet', [ApiApprenantController::class, 'getLiensGoogleMeet']);
     });
     
     // Routes Formateur

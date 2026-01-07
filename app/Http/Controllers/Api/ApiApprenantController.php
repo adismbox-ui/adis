@@ -13,6 +13,7 @@ use App\Models\Question;
 use App\Models\ReponseQuestionnaire;
 use App\Models\Paiement;
 use App\Models\SessionFormation;
+use App\Models\Niveau;
 use Carbon\Carbon;
 
 class ApiApprenantController extends Controller
@@ -606,6 +607,138 @@ class ApiApprenantController extends Controller
             'success' => true,
             'paiements' => $paiementsFormates,
         ], 200);
+    }
+
+    /**
+     * Récupère les modules payés de l'apprenant
+     */
+    public function getModulesPayes(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $apprenant = $user->apprenant;
+
+            if (!$apprenant) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Profil apprenant non trouvé'
+                ], 404);
+            }
+
+            // Récupérer les paiements validés de l'apprenant
+            $paiementsValides = Paiement::where('apprenant_id', $apprenant->id)
+                ->where('statut', 'valide')
+                ->with(['module.niveau'])
+                ->get();
+
+            $modulesPayes = [];
+            $moduleIds = [];
+
+            foreach ($paiementsValides as $paiement) {
+                if ($paiement->module && !in_array($paiement->module->id, $moduleIds)) {
+                    $moduleIds[] = $paiement->module->id;
+                    $modulesPayes[] = [
+                        'id' => $paiement->module->id,
+                        'titre' => $paiement->module->titre,
+                        'description' => $paiement->module->description,
+                        'prix' => $paiement->module->prix,
+                        'date_debut' => $paiement->module->date_debut,
+                        'date_fin' => $paiement->module->date_fin,
+                        'niveau' => $paiement->module->niveau ? [
+                            'id' => $paiement->module->niveau->id,
+                            'nom' => $paiement->module->niveau->nom,
+                        ] : null,
+                        'paiement' => [
+                            'id' => $paiement->id,
+                            'montant' => $paiement->montant,
+                            'date_paiement' => $paiement->date_paiement,
+                        ],
+                    ];
+                }
+            }
+
+            // Statistiques
+            $totalModules = Module::where('niveau_id', $apprenant->niveau_id)->count();
+            $modulesPayesCount = count($modulesPayes);
+
+            return response()->json([
+                'success' => true,
+                'modules_payes' => $modulesPayes,
+                'modules' => $modulesPayes, // Alias pour compatibilité
+                'apprenant' => [
+                    'id' => $apprenant->id,
+                    'niveau_id' => $apprenant->niveau_id,
+                ],
+                'statistiques' => [
+                    'total_modules' => $totalModules,
+                    'modules_payes' => $modulesPayesCount,
+                    'modules_non_payes' => max(0, $totalModules - $modulesPayesCount),
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la récupération des modules payés', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la récupération des modules payés: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Récupère les liens Google Meet pour l'apprenant
+     */
+    public function getLiensGoogleMeet(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $apprenant = $user->apprenant;
+
+            if (!$apprenant) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Profil apprenant non trouvé'
+                ], 404);
+            }
+
+            // Récupérer le niveau de l'apprenant
+            $niveau = $apprenant->niveau;
+
+            if (!$niveau) {
+                return response()->json([
+                    'success' => true,
+                    'liens' => [],
+                    'message' => 'Aucun niveau assigné'
+                ], 200);
+            }
+
+            // Récupérer le lien Google Meet du niveau
+            $liens = [];
+            if ($niveau->lien_meet) {
+                $liens[] = [
+                    'id' => $niveau->id,
+                    'nom' => $niveau->nom,
+                    'lien_meet' => $niveau->lien_meet,
+                    'description' => $niveau->description,
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'liens' => $liens,
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la récupération des liens Google Meet', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur lors de la récupération des liens Google Meet: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
 
