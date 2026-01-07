@@ -16,6 +16,7 @@ use App\Models\Certificat;
 use App\Models\LienSocial;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ApiAdminController extends Controller
 {
@@ -257,11 +258,20 @@ class ApiAdminController extends Controller
                 'telephone' => 'nullable|string|max:20',
                 'sexe' => 'required|in:Homme,Femme',
                 'categorie' => 'nullable|string|max:255',
-                'niveau_id' => 'nullable|exists:niveaux,id',
+                'niveau_id' => 'nullable|integer|exists:niveaux,id',
             ]);
 
+            // Convertir niveau_id en int si c'est une string
+            $niveauId = null;
+            if (isset($data['niveau_id'])) {
+                $niveauId = is_numeric($data['niveau_id']) ? (int)$data['niveau_id'] : null;
+                if ($niveauId && !Niveau::find($niveauId)) {
+                    $niveauId = null;
+                }
+            }
+
             // Créer l'utilisateur
-            $utilisateur = Utilisateur::create([
+            $utilisateurData = [
                 'nom' => $data['nom'],
                 'prenom' => $data['prenom'],
                 'email' => $data['email'],
@@ -272,12 +282,19 @@ class ApiAdminController extends Controller
                 'type_compte' => 'apprenant',
                 'actif' => true,
                 'email_verified_at' => now(),
-            ]);
+            ];
+
+            // Ajouter categorie si le champ existe dans la table
+            if (isset($data['categorie']) && \Schema::hasColumn('utilisateurs', 'categorie')) {
+                $utilisateurData['categorie'] = $data['categorie'];
+            }
+
+            $utilisateur = Utilisateur::create($utilisateurData);
 
             // Créer le profil apprenant
             $apprenant = Apprenant::create([
                 'utilisateur_id' => $utilisateur->id,
-                'niveau_id' => $data['niveau_id'] ?? null,
+                'niveau_id' => $niveauId,
             ]);
 
             return response()->json([
@@ -291,9 +308,14 @@ class ApiAdminController extends Controller
                         'prenom' => $utilisateur->prenom,
                         'email' => $utilisateur->email,
                     ],
+                    'niveau_id' => $apprenant->niveau_id,
                 ],
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Erreur de validation lors de la création de l\'apprenant', [
+                'errors' => $e->errors(),
+                'data' => $request->all()
+            ]);
             return response()->json([
                 'success' => false,
                 'error' => 'Erreur de validation',
@@ -302,7 +324,8 @@ class ApiAdminController extends Controller
         } catch (\Exception $e) {
             \Log::error('Erreur lors de la création de l\'apprenant', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
+                'data' => $request->all()
             ]);
             return response()->json([
                 'success' => false,
