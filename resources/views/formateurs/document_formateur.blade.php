@@ -482,12 +482,13 @@
                                                         $extension = pathinfo($document->fichier, PATHINFO_EXTENSION);
                                                         $isPdf = in_array(strtolower($extension), ['pdf']);
                                                         $isWord = in_array(strtolower($extension), ['doc', 'docx']);
+                                                        $fileUrl = \Illuminate\Support\Facades\Storage::url($document->fichier);
                                                     @endphp
                                                     @if($isPdf)
                                                         <button type="button" class="btn btn-primary-modern btn-modern w-100 mb-2" data-bs-toggle="modal" data-bs-target="#pdfModalNiveau_{{ $document->id }}">
                                                             <i class="fas fa-eye me-1"></i> Voir le PDF
                                                         </button>
-                                                        <a href="{{ asset('storage/' . $document->fichier) }}" target="_blank" class="btn btn-outline-modern btn-modern w-100 mb-2" download>
+                                                        <a href="{{ $fileUrl }}" target="_blank" class="btn btn-outline-modern btn-modern w-100 mb-2" download>
                                                             <i class="fas fa-download me-1"></i> Télécharger le PDF
                                                         </a>
                                                         <div class="modal fade" id="pdfModalNiveau_{{ $document->id }}" tabindex="-1" aria-labelledby="pdfModalNiveauLabel_{{ $document->id }}" aria-hidden="true">
@@ -498,17 +499,17 @@
                                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                                     </div>
                                                                     <div class="modal-body" style="height:80vh;">
-                                                                        <iframe src="{{ asset('storage/' . $document->fichier) }}#toolbar=0" width="100%" height="100%" style="border:none;"></iframe>
+                                                                        <iframe src="{{ $fileUrl }}#toolbar=0" width="100%" height="100%" style="border:none;"></iframe>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     @elseif($isWord)
-                                                        <a href="https://view.officeapps.live.com/op/embed.aspx?src={{ urlencode(asset('storage/' . $document->fichier)) }}" target="_blank" class="btn btn-success-modern btn-modern w-100 mb-2">
+                                                        <a href="https://view.officeapps.live.com/op/embed.aspx?src={{ urlencode($fileUrl) }}" target="_blank" class="btn btn-success-modern btn-modern w-100 mb-2">
                                                             <i class="fas fa-eye me-1"></i> Voir le Word
                                                         </a>
                                                     @else
-                                                        <a href="{{ asset('storage/' . $document->fichier) }}" target="_blank" class="btn btn-outline-modern btn-modern w-100 mb-2">
+                                                        <a href="{{ $fileUrl }}" target="_blank" class="btn btn-outline-modern btn-modern w-100 mb-2">
                                                             <i class="fas fa-download me-1"></i> Télécharger / Ouvrir
                                                         </a>
                                                     @endif
@@ -638,13 +639,14 @@
                                                 $extension = pathinfo($document->fichier, PATHINFO_EXTENSION);
                                                 $isPdf = in_array(strtolower($extension), ['pdf']);
                                                 $isWord = in_array(strtolower($extension), ['doc', 'docx']);
+                                                $fileUrl = \Illuminate\Support\Facades\Storage::url($document->fichier);
                                             @endphp
                                         
                                             @if($isPdf)
                                             <button type="button" class="btn btn-primary-modern btn-modern w-100 mb-2" data-bs-toggle="modal" data-bs-target="#pdfModal_{{ $document->id }}">
                                                     <i class="fas fa-eye me-1"></i> Voir le PDF
                                                 </button>
-                                                <a href="{{ asset('storage/' . $document->fichier) }}" target="_blank" class="btn btn-outline-modern btn-modern w-100 mb-2" download>
+                                                <a href="{{ $fileUrl }}" target="_blank" class="btn btn-outline-modern btn-modern w-100 mb-2" download>
                                                     <i class="fas fa-download me-1"></i> Télécharger le PDF
                                                 </a>
                                                 <!-- Modal PDF -->
@@ -656,17 +658,17 @@
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                       </div>
                                                       <div class="modal-body" style="height:80vh;">
-                                                        <iframe src="{{ asset('storage/' . $document->fichier) }}#toolbar=0" width="100%" height="100%" style="border:none;"></iframe>
+                                                        <iframe src="{{ $fileUrl }}#toolbar=0" width="100%" height="100%" style="border:none;"></iframe>
                                                       </div>
                                                     </div>
                                                   </div>
                                                 </div>
                                             @elseif($isWord)
-                                            <a href="https://view.officeapps.live.com/op/embed.aspx?src={{ urlencode(asset('storage/' . $document->fichier)) }}" target="_blank" class="btn btn-success-modern btn-modern w-100 mb-2">
+                                            <a href="https://view.officeapps.live.com/op/embed.aspx?src={{ urlencode($fileUrl) }}" target="_blank" class="btn btn-success-modern btn-modern w-100 mb-2">
                                                     <i class="fas fa-eye me-1"></i> Voir le Word
                                                 </a>
                                             @else
-                                            <a href="{{ asset('storage/' . $document->fichier) }}" target="_blank" class="btn btn-outline-modern btn-modern w-100 mb-2">
+                                            <a href="{{ $fileUrl }}" target="_blank" class="btn btn-outline-modern btn-modern w-100 mb-2">
                                                     <i class="fas fa-download me-1"></i> Télécharger / Ouvrir
                                                 </a>
                                             @endif

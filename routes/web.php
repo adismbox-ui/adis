@@ -453,6 +453,25 @@ Route::get('/formateur/auto-login/{token}', [\App\Http\Controllers\FormateurCont
 
 Route::get('/documents/debug-generaux', [\App\Http\Controllers\DocumentController::class, 'debugDocumentsGeneraux']);
 
+// Route pour servir les fichiers de documents (fallback si storage:link ne fonctionne pas)
+Route::get('/storage/{path}', function ($path) {
+    $filePath = storage_path('app/public/' . $path);
+    
+    if (!file_exists($filePath)) {
+        abort(404, 'Fichier non trouvé');
+    }
+    
+    $mimeType = mime_content_type($filePath);
+    if (!$mimeType) {
+        $mimeType = 'application/octet-stream';
+    }
+    
+    return response()->file($filePath, [
+        'Content-Type' => $mimeType,
+        'Content-Disposition' => 'inline; filename="' . basename($path) . '"',
+    ]);
+})->where('path', '.*');
+
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/apprenants/questionnaires-test', function () {
