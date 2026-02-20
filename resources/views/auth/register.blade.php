@@ -103,7 +103,7 @@
                             <div class="row g-3 mb-3">
                                 <div class="col-md-6">
                                     <label for="type_compte" class="form-label">Type de compte</label>
-                                    <select class="form-select" id="type_compte" name="type_compte" required>
+                                    <select class="form-select @error('type_compte') is-invalid @enderror" id="type_compte" name="type_compte" required>
                                         <option value="">Choisir...</option>
                                         @php($allowed = $allowedTypes ?? null)
                                         @if(!$allowed || in_array('admin', $allowed))
@@ -117,12 +117,15 @@
                                             @endunless
                                         @endif
                                         @if(!$allowed || in_array('formateur', $allowed))
-                                            <option value="formateur" {{ old('type_compte')==='formateur' ? 'selected' : '' }}>Formateur</option>
+                                            <option value="formateur" {{ old('type_compte')==='formateur' ? 'selected' : '' }}>Professeur / Formateur</option>
                                         @endif
                                         @if(!$allowed || in_array('apprenant', $allowed))
                                             <option value="apprenant" {{ old('type_compte')==='apprenant' ? 'selected' : '' }}>Apprenant</option>
                                         @endif
                                     </select>
+                                    @error('type_compte')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="col-md-6">
                                     <label for="categorie" class="form-label">Catégorie</label>
@@ -607,17 +610,19 @@ updateStep2Content();
 showStep(1);
 updateCategorieOptions(); // Initialiser au chargement
 
-// Si retour avec erreurs, conserver le type et afficher l'étape 2 directement
+// Si retour avec erreurs, conserver les valeurs et afficher l'étape appropriée
 @if ($errors->any())
     (function() {
+        var hasTypeError = @json($errors->has('type_compte'));
         var oldType = @json(old('type_compte'));
-        if (oldType) {
-            var typeSelect = document.getElementById('type_compte');
-            if (typeSelect) {
-                typeSelect.value = oldType;
-            }
-            updateCategorieOptions();
-            updateStep2Content();
+        var typeSelect = document.getElementById('type_compte');
+        if (typeSelect && oldType) typeSelect.value = oldType;
+        updateCategorieOptions();
+        updateStep2Content();
+        // En cas d'erreur type_compte, afficher l'étape 1 pour corriger
+        if (hasTypeError) {
+            showStep(1);
+        } else if (oldType) {
             showStep(2);
         }
     })();

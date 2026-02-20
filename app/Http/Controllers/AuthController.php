@@ -14,15 +14,14 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $current = Auth::user();
-        $allowedTypes = null;
+        $allowedTypes = ['formateur', 'apprenant']; // Par défaut : inscription publique
         if ($current && $current->type_compte === 'admin') {
             $allowedTypes = ['formateur', 'apprenant'];
         } elseif ($current && $current->type_compte === 'formateur') {
-            // Un formateur connecté ne peut pas créer d'apprenant (réservé à l'admin)
             $allowedTypes = ['assistant'];
         }
 
-        if ($allowedTypes && !in_array($request->type_compte, $allowedTypes, true)) {
+        if (!in_array($request->type_compte, $allowedTypes, true)) {
             return back()->withErrors(['type_compte' => 'Type de compte non autorisé pour votre profil.'])->withInput();
         }
 
@@ -172,7 +171,8 @@ class AuthController extends Controller
         $assistantExists = \App\Models\Utilisateur::where('type_compte', 'assistant')->exists();
         $niveaux = \App\Models\Niveau::orderBy('ordre')->get();
         $current = Auth::user();
-        $allowedTypes = null;
+        // Par défaut (visiteur public) : Formateur et Apprenant
+        $allowedTypes = ['formateur', 'apprenant'];
         if ($current && $current->type_compte === 'admin') {
             $allowedTypes = ['formateur', 'apprenant'];
         } elseif ($current && $current->type_compte === 'formateur') {
