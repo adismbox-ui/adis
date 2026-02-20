@@ -372,18 +372,35 @@ class ApiFormateurController extends Controller
                 'error' => 'Profil formateur non trouvé'
             ], 404);
         }
-        // Documents explicitement rattachés au formateur
+        // Documents visibles par le formateur :
+        // - documents de ses modules (module.formateur_id)
+        // - documents des modules de ses niveaux (niveau.formateur_id)
+        // - documents généraux de niveau (niveau_id défini, module_id NULL)
         $niveauIds = $formateur->niveaux()->pluck('id');
-        $documents = Document::where(function($q) use ($formateur, $niveauIds) {
-                $q->where('formateur_id', $formateur->id)
-                  // + documents généraux de niveau créés côté admin (niveau défini, sans module ni formateur)
-                  ->orWhere(function($qq) use ($niveauIds) {
-                      if ($niveauIds->isNotEmpty()) {
-                          $qq->whereNull('formateur_id')
-                             ->whereNull('module_id')
-                             ->whereIn('niveau_id', $niveauIds);
-                      }
-                  });
+        $moduleIds = Module::query()
+            ->where('formateur_id', $formateur->id)
+            ->when($niveauIds->isNotEmpty(), function ($q) use ($niveauIds) {
+                $q->orWhereIn('niveau_id', $niveauIds);
+            })
+            ->pluck('id');
+
+        $documents = Document::query()
+            ->where(function ($q) use ($moduleIds, $niveauIds, $formateur) {
+                if ($moduleIds->isNotEmpty()) {
+                    $q->whereIn('module_id', $moduleIds);
+                } else {
+                    $q->whereRaw('1=0');
+                }
+
+                if ($niveauIds->isNotEmpty()) {
+                    $q->orWhere(function ($qq) use ($niveauIds) {
+                        $qq->whereNull('module_id')
+                           ->whereIn('niveau_id', $niveauIds);
+                    });
+                }
+
+                // fallback: documents explicitement rattachés au formateur (si utilisés)
+                $q->orWhere('formateur_id', $formateur->id);
             })
             ->with(['module', 'niveau'])
             ->get();

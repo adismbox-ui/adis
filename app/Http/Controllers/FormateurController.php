@@ -274,8 +274,24 @@ class FormateurController extends Controller
             return redirect()->route('login');
         }
         $formateur = $user->formateur;
-        // Charger documents ET audio (depuis la base de données) pour chaque module du formateur
-        $modules = $formateur ? $formateur->modules()->with('documents')->get() : collect();
+        // Charger documents (et audio via documents) pour :
+        // - les modules explicitement assignés au formateur (module.formateur_id)
+        // - les modules appartenant aux niveaux du formateur (niveau.formateur_id)
+        $modules = collect();
+        if ($formateur) {
+            $niveauIds = $formateur->niveaux()->pluck('id');
+
+            $modules = \App\Models\Module::query()
+                ->where('formateur_id', $formateur->id)
+                ->when($niveauIds->isNotEmpty(), function ($q) use ($niveauIds) {
+                    $q->orWhereIn('niveau_id', $niveauIds);
+                })
+                ->with('documents')
+                ->orderBy('titre')
+                ->get()
+                ->unique('id')
+                ->values();
+        }
 
         // Charger aussi les documents "généraux de niveau" créés par l'admin
         // (niveau sélectionné, module laissé vide dans l'admin)
