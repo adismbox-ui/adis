@@ -428,6 +428,103 @@
                 </div>
                 
                 <div class="card-body p-4">
+    @php
+        $documentsNiveaux = $documentsNiveaux ?? collect();
+    @endphp
+
+    {{-- Bloc documents généraux par niveau (créés côté admin sur un niveau, sans module) --}}
+    @if($documentsNiveaux->isNotEmpty())
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-layer-group text-white"></i>
+                            </div>
+                            Documents généraux de mes niveaux
+                        </div>
+                        @php
+                            $docsParNiveau = $documentsNiveaux->groupBy(function($doc) {
+                                return optional($doc->niveau)->nom ?? 'Sans niveau';
+                            });
+                        @endphp
+                        @foreach($docsParNiveau as $niveauNom => $docs)
+                            <div class="module-card animate-on-scroll">
+                                <div class="module-header">
+                                    <div class="module-title">
+                                        <div>
+                                            <i class="fas fa-graduation-cap me-2"></i>
+                                            Niveau : {{ $niveauNom }}
+                                        </div>
+                                        <span class="module-badge">
+                                            <i class="fas fa-file-alt me-1"></i>
+                                            {{ $docs->count() }} document(s)
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="p-4">
+                                    <div class="row g-3">
+                                        @foreach($docs as $document)
+                                            <div class="col-md-4">
+                                                <div class="document-card">
+                                                    <div class="document-title">
+                                                        <i class="fas fa-file me-2"></i>
+                                                        {{ $document->titre }}
+                                                    </div>
+                                                    <div class="document-info">
+                                                        <div class="mb-2">
+                                                            <i class="fas fa-tag me-1"></i>
+                                                            Type : <strong>{{ $document->type ?? 'Document' }}</strong>
+                                                        </div>
+                                                        <div>
+                                                            <i class="fas fa-calendar me-1"></i>
+                                                            Semaine : <strong>{{ $document->semaine ?? '-' }}</strong>
+                                                        </div>
+                                                    </div>
+                                                    @php
+                                                        $extension = pathinfo($document->fichier, PATHINFO_EXTENSION);
+                                                        $isPdf = in_array(strtolower($extension), ['pdf']);
+                                                        $isWord = in_array(strtolower($extension), ['doc', 'docx']);
+                                                    @endphp
+                                                    @if($isPdf)
+                                                        <button type="button" class="btn btn-primary-modern btn-modern w-100 mb-2" data-bs-toggle="modal" data-bs-target="#pdfModalNiveau_{{ $document->id }}">
+                                                            <i class="fas fa-eye me-1"></i> Voir le PDF
+                                                        </button>
+                                                        <div class="modal fade" id="pdfModalNiveau_{{ $document->id }}" tabindex="-1" aria-labelledby="pdfModalNiveauLabel_{{ $document->id }}" aria-hidden="true">
+                                                            <div class="modal-dialog modal-xl">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title" id="pdfModalNiveauLabel_{{ $document->id }}">{{ $document->titre }}</h5>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </div>
+                                                                    <div class="modal-body" style="height:80vh;">
+                                                                        <iframe src="{{ asset('storage/' . $document->fichier) }}#toolbar=0" width="100%" height="100%" style="border:none;"></iframe>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @elseif($isWord)
+                                                        <a href="https://view.officeapps.live.com/op/embed.aspx?src={{ urlencode(asset('storage/' . $document->fichier)) }}" target="_blank" class="btn btn-success-modern btn-modern w-100 mb-2">
+                                                            <i class="fas fa-eye me-1"></i> Voir le Word
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ asset('storage/' . $document->fichier) }}" target="_blank" class="btn btn-outline-modern btn-modern w-100 mb-2">
+                                                            <i class="fas fa-download me-1"></i> Télécharger / Ouvrir
+                                                        </a>
+                                                    @endif
+                                                    <div class="text-end">
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-clock me-1"></i>
+                                                            Ajouté le {{ optional($document->created_at)->format('d/m/Y') }}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+    @endif
+
+    {{-- Bloc documents par module (existant) --}}
     @if($modules->isEmpty())
                         <div class="alert-modern alert-info-modern animate-on-scroll">
                             <i class="fas fa-info-circle me-2"></i>

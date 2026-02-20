@@ -274,8 +274,22 @@ class FormateurController extends Controller
             return redirect()->route('login');
         }
         $formateur = $user->formateur;
-        // Charger documents ET audio (depuis la base de données)
+        // Charger documents ET audio (depuis la base de données) pour chaque module du formateur
         $modules = $formateur ? $formateur->modules()->with('documents')->get() : collect();
+
+        // Charger aussi les documents "généraux de niveau" créés par l'admin
+        // (niveau sélectionné, module laissé vide dans l'admin)
+        $documentsNiveaux = collect();
+        if ($formateur) {
+            $niveauIds = $formateur->niveaux()->pluck('id');
+            if ($niveauIds->isNotEmpty()) {
+                $documentsNiveaux = \App\Models\Document::whereNull('module_id')
+                    ->whereIn('niveau_id', $niveauIds)
+                    ->with('niveau')
+                    ->orderBy('date_envoi', 'desc')
+                    ->get();
+            }
+        }
         // Pour chaque module, s'assurer que l'audio est bien le champ de la base
         foreach ($modules as $module) {
             if ($module->audio && !str_starts_with($module->audio, 'audios/')) {
@@ -283,7 +297,7 @@ class FormateurController extends Controller
                 $module->audio = 'audios/' . $module->audio;
             }
         }
-        return view('formateurs.document_formateur', compact('modules'));
+        return view('formateurs.document_formateur', compact('modules', 'documentsNiveaux'));
     }
 
     /**

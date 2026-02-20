@@ -372,8 +372,19 @@ class ApiFormateurController extends Controller
                 'error' => 'Profil formateur non trouvé'
             ], 404);
         }
-
-        $documents = Document::where('formateur_id', $formateur->id)
+        // Documents explicitement rattachés au formateur
+        $niveauIds = $formateur->niveaux()->pluck('id');
+        $documents = Document::where(function($q) use ($formateur, $niveauIds) {
+                $q->where('formateur_id', $formateur->id)
+                  // + documents généraux de niveau créés côté admin (niveau défini, sans module ni formateur)
+                  ->orWhere(function($qq) use ($niveauIds) {
+                      if ($niveauIds->isNotEmpty()) {
+                          $qq->whereNull('formateur_id')
+                             ->whereNull('module_id')
+                             ->whereIn('niveau_id', $niveauIds);
+                      }
+                  });
+            })
             ->with(['module', 'niveau'])
             ->get();
 
