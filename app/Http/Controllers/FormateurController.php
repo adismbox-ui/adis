@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Formateur;
+use App\Models\Document;
 use Illuminate\Support\Facades\Auth;
 
 class FormateurController extends Controller
@@ -314,6 +315,53 @@ class FormateurController extends Controller
             }
         }
         return view('formateurs.document_formateur', compact('modules', 'documentsNiveaux'));
+    }
+
+    /**
+     * Sert le fichier d'un document (PDF, audio, etc.) pour un formateur connecté.
+     * ?type=audio pour servir le fichier audio si présent.
+     */
+    public function servirDocument(Request $request, Document $document)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            abort(403);
+        }
+        $formateur = $user->formateur;
+        if (!$formateur) {
+            abort(403);
+        }
+
+        $fichier = $request->query('type') === 'audio' ? $document->audio : $document->fichier;
+        if (!$fichier) {
+            abort(404, 'Fichier non disponible');
+        }
+
+        $filePath = storage_path('app/public/' . $fichier);
+        if (!file_exists($filePath)) {
+            abort(404, 'Fichier non trouvé sur le serveur');
+        }
+
+        // Vérifier que le formateur a accès : modules, niveaux ou document général de niveau
+        $niveauIds = $formateur->niveaux()->pluck('id');
+        $moduleIds = \App\Models\Module::query()
+            ->where('formateur_id', $formateur->id)
+            ->when($niveauIds->isNotEmpty(), fn($q) => $q->orWhereIn('niveau_id', $niveauIds))
+            ->pluck('id');
+
+        $aAcces = $document->formateur_id === $formateur->id
+            || ($document->module_id && $moduleIds->contains($document->module_id))
+            || ($document->niveau_id && $niveauIds->contains($document->niveau_id));
+
+        if (!$aAcces) {
+            abort(403);
+        }
+
+        $mime = mime_content_type($filePath) ?: 'application/octet-stream';
+        return response()->file($filePath, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="' . basename($fichier) . '"',
+        ]);
     }
 
     /**

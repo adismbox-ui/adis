@@ -85,6 +85,7 @@ Route::post('/apprenants/{apprenant}/generer-certificat', [ApprenantController::
 Route::post('/apprenants/{apprenant}/toggle-activation', [ApprenantController::class, 'toggleActivation'])->name('apprenants.toggle-activation');
 Route::get('/formateurs/dashboard', [FormateurController::class, 'dashboard'])->middleware('auth')->name('formateurs.dashboard');
 Route::get('/formateurs/documents', [FormateurController::class, 'documentFormateur'])->middleware('auth')->name('formateurs.documents');
+Route::get('/formateurs/document/{document}/fichier', [FormateurController::class, 'servirDocument'])->middleware('auth')->name('formateurs.document.servir');
 Route::get('/formateurs/questionnaires', [FormateurController::class, 'questionnairesFormateur'])->middleware('auth')->name('formateurs.questionnaires');
 
 // Routes dashboard assistant

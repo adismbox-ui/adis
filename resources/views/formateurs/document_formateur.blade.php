@@ -482,7 +482,7 @@
                                                         $extension = pathinfo($document->fichier, PATHINFO_EXTENSION);
                                                         $isPdf = in_array(strtolower($extension), ['pdf']);
                                                         $isWord = in_array(strtolower($extension), ['doc', 'docx']);
-                                                        $fileUrl = \Illuminate\Support\Facades\Storage::url($document->fichier);
+                                                        $fileUrl = route('formateurs.document.servir', $document);
                                                     @endphp
                                                     @if($isPdf)
                                                         <button type="button" class="btn btn-primary-modern btn-modern w-100 mb-2" data-bs-toggle="modal" data-bs-target="#pdfModalNiveau_{{ $document->id }}">
@@ -579,16 +579,18 @@
                                                                 </div>
                                                                 
                                                 <div class="audio-player-modern">
+                                                    @if($audioDoc->audio)
                                                     <audio controls>
-                                                        <source src="{{ asset('storage/' . $audioDoc->audio) }}" type="audio/mpeg">
-                                                        <source src="{{ asset('storage/' . $audioDoc->audio) }}" type="audio/mp3">
-                                                        <source src="{{ asset('storage/' . $audioDoc->audio) }}" type="audio/wav">
+                                                        <source src="{{ route('formateurs.document.servir', $audioDoc) }}?type=audio" type="audio/mpeg">
+                                                        <source src="{{ route('formateurs.document.servir', $audioDoc) }}?type=audio" type="audio/mp3">
+                                                        <source src="{{ route('formateurs.document.servir', $audioDoc) }}?type=audio" type="audio/wav">
                                                         Votre navigateur ne supporte pas la lecture audio.
                                                     </audio>
+                                                    @endif
                                                 </div>
                                                 
                                                     @if(!empty($audioDoc->fichier))
-                                                    <a href="{{ asset('storage/' . $audioDoc->fichier) }}" target="_blank" class="btn btn-outline-modern btn-modern w-100 mb-2">
+                                                    <a href="{{ route('formateurs.document.servir', $audioDoc) }}" target="_blank" class="btn btn-outline-modern btn-modern w-100 mb-2">
                                                             <i class="fas fa-file-pdf me-1"></i> Voir / Télécharger le PDF
                                                         </a>
                                                     @endif
@@ -639,7 +641,7 @@
                                                 $extension = pathinfo($document->fichier, PATHINFO_EXTENSION);
                                                 $isPdf = in_array(strtolower($extension), ['pdf']);
                                                 $isWord = in_array(strtolower($extension), ['doc', 'docx']);
-                                                $fileUrl = \Illuminate\Support\Facades\Storage::url($document->fichier);
+                                                $fileUrl = route('formateurs.document.servir', $document);
                                             @endphp
                                         
                                             @if($isPdf)
