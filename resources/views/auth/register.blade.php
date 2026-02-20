@@ -449,9 +449,49 @@ function updateStep2Content() {
         document.getElementById('step-indicator').classList.add('d-none');
     }
 }
-// Ajout d'un message d'erreur
+// Validation avant d'avancer
 let typeError = null;
+let validationError = null;
+function removeValidationError() {
+    if (validationError) { validationError.remove(); validationError = null; }
+}
+function showValidationError(msg) {
+    removeValidationError();
+    validationError = document.createElement('div');
+    validationError.className = 'alert alert-danger mt-3';
+    validationError.innerText = msg;
+    validationError.setAttribute('role', 'alert');
+    document.getElementById('step-1').appendChild(validationError);
+    validationError.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function getStep1Fields() {
+    return document.querySelectorAll('#step-1 input[required], #step-1 select[required]');
+}
+function validateStep1() {
+    const fields = getStep1Fields();
+    for (const f of fields) {
+        if (!f.value || !f.value.trim()) {
+            const label = (f.id && document.querySelector('label[for="' + f.id + '"]')) ? document.querySelector('label[for="' + f.id + '"]').innerText : f.name;
+            showValidationError('Veuillez remplir le champ "' + (label || 'obligatoire') + '" avant de continuer.');
+            f.focus();
+            return false;
+        }
+    }
+    if (document.getElementById('password').value.length < 8) {
+        showValidationError('Le mot de passe doit contenir au moins 8 caractères.');
+        document.getElementById('password').focus();
+        return false;
+    }
+    if (document.getElementById('password').value !== document.getElementById('password_confirmation').value) {
+        showValidationError('Les mots de passe ne correspondent pas.');
+        document.getElementById('password_confirmation').focus();
+        return false;
+    }
+    removeValidationError();
+    return true;
+}
 document.getElementById('next-1').onclick = function() {
+    removeValidationError();
     const type = document.getElementById('type_compte').value;
     if (type !== 'apprenant' && type !== 'formateur') {
         if (!typeError) {
@@ -463,15 +503,71 @@ document.getElementById('next-1').onclick = function() {
         return;
     }
     if (typeError) { typeError.remove(); typeError = null; }
+    if (!validateStep1()) return;
     updateStep2Content();
     showStep(2);
     currentStep = 2;
 };
 document.getElementById('prev-2').onclick = function() {
+    removeValidationError();
     showStep(1);
     currentStep = 1;
 };
+function getStep2RequiredSelects() {
+    const type = document.getElementById('type_compte').value;
+    const container = type === 'apprenant' ? document.getElementById('step2-apprenant') : document.getElementById('step2-formateur');
+    if (!container) return [];
+    return container.querySelectorAll('select[name]:not([multiple])');
+}
+function validateStep2() {
+    const selects = getStep2RequiredSelects();
+    for (const s of selects) {
+        if (!s.value || s.value.trim() === '' || (s.options[s.selectedIndex] && s.options[s.selectedIndex].text.trim() === 'Choisir...')) {
+            const label = s.closest('.mb-3')?.querySelector('.form-label');
+            const labelText = (label && label.innerText) ? label.innerText.replace(/\s*\*\s*$/, '').trim() : 'obligatoire';
+            removeValidationError();
+            validationError = document.createElement('div');
+            validationError.className = 'alert alert-danger mt-3';
+            validationError.innerText = 'Veuillez remplir le champ "' + labelText + '" avant de continuer.';
+            validationError.setAttribute('role', 'alert');
+            document.getElementById('step-2').appendChild(validationError);
+            validationError.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            s.focus();
+            return false;
+        }
+    }
+    var dr = document.getElementById('diplome_religieux_formateur');
+    if (dr && dr.value === 'AUTRE') {
+        var inp = document.querySelector('input[name="diplome_religieux_autre_formateur"]');
+        if (inp && (!inp.value || !inp.value.trim())) {
+            removeValidationError();
+            validationError = document.createElement('div');
+            validationError.className = 'alert alert-danger mt-3';
+            validationError.innerText = 'Veuillez préciser votre diplôme en sciences religieuses.';
+            document.getElementById('step-2').appendChild(validationError);
+            inp.focus();
+            return false;
+        }
+    }
+    var dg = document.getElementById('diplome_general_formateur');
+    if (dg && dg.value === 'AUTRE') {
+        var inp2 = document.querySelector('input[name="diplome_general_autre_formateur"]');
+        if (inp2 && (!inp2.value || !inp2.value.trim())) {
+            removeValidationError();
+            validationError = document.createElement('div');
+            validationError.className = 'alert alert-danger mt-3';
+            validationError.innerText = 'Veuillez préciser votre diplôme en sciences générales.';
+            document.getElementById('step-2').appendChild(validationError);
+            inp2.focus();
+            return false;
+        }
+    }
+    removeValidationError();
+    return true;
+}
 document.getElementById('next-2').onclick = function() {
+    removeValidationError();
+    if (!validateStep2()) return;
     const type = document.getElementById('type_compte').value;
     showStep(3);
     currentStep = 3;
@@ -479,6 +575,7 @@ document.getElementById('next-2').onclick = function() {
     document.getElementById('confirmation-formateur').classList.toggle('d-none', type !== 'formateur');
 };
 document.getElementById('prev-3').onclick = function() {
+    removeValidationError();
     showStep(2);
     currentStep = 2;
 };
