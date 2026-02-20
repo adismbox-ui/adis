@@ -1494,6 +1494,26 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             animation: appMobileFloat 8s ease-in-out infinite;
             text-decoration: none;
+            overflow: visible;
+        }
+        .app-mobile-float-label {
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            line-height: 1.15;
+            white-space: nowrap;
+            background: rgba(17, 24, 39, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+            color: #fff;
+            backdrop-filter: blur(8px);
+            pointer-events: none;
         }
         .app-mobile-float:hover {
             box-shadow: 0 16px 56px rgba(102, 126, 234, 0.6);
@@ -1534,6 +1554,14 @@
                 font-size: 2rem;
                 left: 20px;
                 bottom: 100px;
+            }
+            .app-mobile-float-label {
+                top: calc(100% + 8px);
+                font-size: 0.72rem;
+                padding: 7px 10px;
+                max-width: 78vw;
+                white-space: normal;
+                text-align: center;
             }
             @keyframes appMobileFloat {
                 0% {
@@ -1696,6 +1724,7 @@ N'hésitez pas à nous contacter au besoin pour plus d'informations.
     <!-- Bouton flottant pour télécharger l'application mobile -->
     <a href="/download-app" class="app-mobile-float" title="Télécharger l'application mobile ADIS">
         <i class="fas fa-mobile-alt"></i>
+        <span class="app-mobile-float-label">Veuillez télécharger l’application mobile</span>
     </a>
     <!-- WhatsApp flottant -->
     <a href="https://wa.me/message/URJVLNOBZL43D1" class="whatsapp-float" target="_blank" title="Contactez-nous sur WhatsApp">
