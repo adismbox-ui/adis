@@ -63,17 +63,7 @@
 					</div>
 				</div>
 				<div class="row mb-3">
-					<div class="col-md-6">
-						<label for="semaine" class="form-label">Semaine *</label>
-						<select class="form-select @error('semaine') is-invalid @enderror" id="semaine" name="semaine" required>
-							<option value="">-- Choisir la semaine --</option>
-							@for($i = 1; $i <= 12; $i++)
-								<option value="{{ $i }}" {{ old('semaine') == $i ? 'selected' : '' }}>Semaine {{ $i }}</option>
-							@endfor
-						</select>
-						@error('semaine')<div class="invalid-feedback">{{ $message }}</div>@enderror
-					</div>
-					<div class="col-md-6">
+					<div class="col-md-12">
 						<label for="titre" class="form-label">Titre du document *</label>
 						<input type="text" class="form-control" id="titre" name="titre" required>
 					</div>

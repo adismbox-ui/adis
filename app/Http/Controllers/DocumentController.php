@@ -57,7 +57,6 @@ class DocumentController extends Controller
             'audio' => 'nullable|file|mimes:mp3,wav,ogg',
             'module_id' => 'nullable|exists:modules,id',
             'niveau_id' => 'required|exists:niveaux,id',
-            'semaine' => 'required|integer|min:1|max:12',
             'session_id' => 'required|exists:sessions_formation,id',
             'date_envoi' => 'required|string',
         ]);
@@ -83,7 +82,7 @@ class DocumentController extends Controller
         
         // Marquer comme créé par l'admin
         $data['created_by_admin'] = true;
-        $data['semaine'] = $request->input('semaine');
+        $data['semaine'] = null;
         $data['session_id'] = $request->session_id;
         $data['date_envoi'] = $dateEnvoi;
         $data['envoye'] = false;
