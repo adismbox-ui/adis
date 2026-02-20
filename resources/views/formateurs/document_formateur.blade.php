@@ -487,6 +487,9 @@
                                                         <button type="button" class="btn btn-primary-modern btn-modern w-100 mb-2" data-bs-toggle="modal" data-bs-target="#pdfModalNiveau_{{ $document->id }}">
                                                             <i class="fas fa-eye me-1"></i> Voir le PDF
                                                         </button>
+                                                        <a href="{{ asset('storage/' . $document->fichier) }}" target="_blank" class="btn btn-outline-modern btn-modern w-100 mb-2" download>
+                                                            <i class="fas fa-download me-1"></i> Télécharger le PDF
+                                                        </a>
                                                         <div class="modal fade" id="pdfModalNiveau_{{ $document->id }}" tabindex="-1" aria-labelledby="pdfModalNiveauLabel_{{ $document->id }}" aria-hidden="true">
                                                             <div class="modal-dialog modal-xl">
                                                                 <div class="modal-content">
@@ -641,6 +644,9 @@
                                             <button type="button" class="btn btn-primary-modern btn-modern w-100 mb-2" data-bs-toggle="modal" data-bs-target="#pdfModal_{{ $document->id }}">
                                                     <i class="fas fa-eye me-1"></i> Voir le PDF
                                                 </button>
+                                                <a href="{{ asset('storage/' . $document->fichier) }}" target="_blank" class="btn btn-outline-modern btn-modern w-100 mb-2" download>
+                                                    <i class="fas fa-download me-1"></i> Télécharger le PDF
+                                                </a>
                                                 <!-- Modal PDF -->
                                                 <div class="modal fade" id="pdfModal_{{ $document->id }}" tabindex="-1" aria-labelledby="pdfModalLabel_{{ $document->id }}" aria-hidden="true">
                                                   <div class="modal-dialog modal-xl">
