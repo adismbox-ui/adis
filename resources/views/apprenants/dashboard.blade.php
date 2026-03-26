@@ -522,6 +522,44 @@
                             </div>
                         </div>
 
+                        <!-- Lien Meet du niveau -->
+                        @if($apprenant && $apprenant->niveau && $apprenant->niveau->lien_meet)
+                        <div class="glass-card mb-4">
+                            <div class="card-header header-gradient">
+                                <h4 class="mb-0">
+                                    <i class="fas fa-video me-2 icon-animated"></i>
+                                    Lien de réunion pour votre niveau
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-animated d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <strong>Votre niveau : </strong>
+                                        <span class="badge badge-3d">{{ $apprenant->niveau->nom }}</span>
+                                        <br>
+                                        <strong>Lien Google Meet : </strong>
+                                        <a href="{{ $apprenant->niveau->lien_meet }}" target="_blank" class="text-decoration-none">
+                                            <span class="badge badge-3d" style="background: linear-gradient(135deg, #4285f4, #34a853);">
+                                                <i class="fas fa-external-link-alt me-1"></i>
+                                                Rejoindre la réunion
+                                            </span>
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-3d" onclick="copierLienMeet('{{ $apprenant->niveau->lien_meet }}')">
+                                            <i class="fas fa-copy me-1"></i>
+                                            Copier le lien
+                                        </button>
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Ce lien est spécifique à votre niveau ({{ $apprenant->niveau->nom }}) et vous permet de rejoindre les sessions en direct.
+                                </small>
+                            </div>
+                        </div>
+                        @endif
+
                         <!-- Partie paiement (ne pas toucher) -->
                         @includeWhen(isset($paiements) && isset($modules), 'apprenants.partials.paiement')
                     </div>
@@ -604,6 +642,24 @@
                 }, 200);
             });
         });
+
+        // Fonction pour copier le lien Meet
+        function copierLienMeet(lien) {
+            navigator.clipboard.writeText(lien).then(() => {
+                // Afficher une notification temporaire
+                const notification = document.createElement('div');
+                notification.className = 'alert alert-success position-fixed top-0 start-50 translate-middle-x mt-3';
+                notification.style.zIndex = '9999';
+                notification.innerHTML = '<i class="fas fa-check-circle me-2"></i>Lien Meet copié dans le presse-papiers !';
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }).catch(err => {
+                console.error('Erreur lors de la copie du lien:', err);
+            });
+        }
     });
 </script>
 @endsection
